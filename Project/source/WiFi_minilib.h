@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#define SSID	"MES-NDS"
+#define SSID "azy1"
 
 
 //WiFi initialization
@@ -22,6 +22,20 @@ int sendData(char* data_buff, int bytes);
 void closeSocket();
 //Disconnect the WiFi
 void disconnectFromWiFi();
+
+////////////////////// TEST FUNCTIONS
+
+typedef enum Messages_e {
+	A,	//0x00
+	B,	//0x01
+	X,	//0x02
+	Y	//0x03
+}Message;
+
+void sendMessageTest();
+void receiveMessageTest();
+
+
 
 
 #endif // WIFI_MINILIB_H
