@@ -24,19 +24,4 @@ void closeSocket();
 //Disconnect the WiFi
 void disconnectFromWiFi();
 
-////////////////////// TEST FUNCTIONS
-
-typedef enum Messages_e {
-	A,	//0x00
-	B,	//0x01
-	X,	//0x02
-	Y	//0x03
-}Message;
-
-void sendMessageTest();
-void receiveMessageTest();
-
-
-
-
 #endif // WIFI_MINILIB_H
