@@ -6,10 +6,10 @@
 int main(void) {
 
     consoleDemoInit();
-    int a = 1;
 
+    //Initialize WiFi
+	wifi_init();
     while(1){
-        printf("\nHello Times:%d!\n",a++);
         swiWaitForVBlank();
     }
 }

@@ -6,8 +6,9 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <stdio.h>
 
-#define SSID	"MES-NDS"
+#define SSID "azy1"
 
 
 //WiFi initialization
@@ -22,6 +23,5 @@ int sendData(char* data_buff, int bytes);
 void closeSocket();
 //Disconnect the WiFi
 void disconnectFromWiFi();
-
 
 #endif // WIFI_MINILIB_H
