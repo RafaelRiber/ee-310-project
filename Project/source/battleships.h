@@ -3,6 +3,9 @@
 
 #include "stdint.h"
 #include "stdlib.h"
+#include <stdbool.h>
+#include <string.h> /* memset */
+
 //The 1990 Milton Bradley version
 enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};
 
@@ -22,8 +25,8 @@ enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};
 #define SET_Y(coord, y) (coords & y)
 
 //get is_hit for coord i of hits bitmap
-#define GET_HIT(hits, i) ((hits >> i) & 0x1);
-#define SET_HIT(hits, i) (hits | (0x1 << i));
+#define GET_HIT(hits, i) ((hits >> i) & 0x1)
+#define SET_HIT(hits, i) (hits | (0x1 << i))
 
 typedef struct ship {
     uint8_t len;
@@ -36,5 +39,39 @@ extern ship player_ships[NUM_SHIPS];
 extern ship enemy_ships[NUM_SHIPS];
 
 void init_ships(void);
+
+// Game FSM
+
+typedef enum {
+	STATE_HOMESCREEN,
+    STATE_INITIALIZING,
+    STATE_PLACING_SHIPS,
+	STATE_WAIT_FOR_ENEMY_PLACEMENT,
+    STATE_WAITING_FOR_TURN,
+    STATE_TAKING_TURN,
+    STATE_CHECKING_WIN,
+    STATE_WIN,
+    STATE_LOSE
+} GameState;
+
+bool start_hosting();
+
+bool join_game();
+
+void place_ships();
+
+bool all_ships_placed();
+
+void recv_enemy_ships();
+
+bool my_turn();
+
+bool turn_ended();
+
+bool game_won();
+
+bool game_lost();
+
+void update_state(GameState* state);
 
 #endif
