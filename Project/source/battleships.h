@@ -38,14 +38,19 @@ typedef struct ship {
 extern ship player_ships[NUM_SHIPS];
 extern ship enemy_ships[NUM_SHIPS];
 
+extern bool hosting;
+
 void init_ships(void);
 
 // Game FSM
 
 typedef enum {
-	STATE_HOMESCREEN,
-    STATE_INITIALIZING,
-    STATE_PLACING_SHIPS,
+    STATE_INIT,
+	STATE_HOME,
+	STATE_HOST,
+    STATE_JOIN,
+	STATE_START_GAME,
+	STATE_PLACE_SHIPS,
 	STATE_WAIT_FOR_ENEMY_PLACEMENT,
     STATE_WAITING_FOR_TURN,
     STATE_TAKING_TURN,
@@ -54,19 +59,13 @@ typedef enum {
     STATE_LOSE
 } GameState;
 
-bool start_hosting();
-
-bool join_game();
-
 void place_ships();
-
-bool all_ships_placed();
 
 void recv_enemy_ships();
 
-bool my_turn();
+bool all_ships_placed();
 
-bool turn_ended();
+bool all_ships_received();
 
 bool game_won();
 

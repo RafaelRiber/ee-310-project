@@ -11,7 +11,7 @@ int main(void) {
 	wifi_init();
 
 	// Initialize game FSM
-	GameState state = STATE_INITIALIZING;
+	GameState state = STATE_INIT;
 
 
     while(1){
