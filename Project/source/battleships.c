@@ -3,7 +3,7 @@
 ship player_ships[NUM_SHIPS];
 ship enemy_ships[NUM_SHIPS];
 
-bool hosting;
+bool hosting = false;
 
 void init_ships(void) {
     player_ships[CARRIER].len = CARRIER_SIZE;
@@ -95,17 +95,11 @@ bool game_lost() {
 
 void update_state(GameState* state) {
     switch (*state) {
-    case STATE_INIT:
-    	init_ships();
-    	// TODO: ADD WIFI INIT ONCE COMM IS VALIDATED
-    	//wifi_init();
-    	*state = STATE_HOME;
-    	break;
     case STATE_HOME:
 
     	//TODO: DETERMINE VALUE OF HOSTING BOOLEAN FROM USER INPUT
 
-		if (hosting) {
+    	if (hosting) {
 			*state = STATE_HOST;
 		} else if (!hosting) {
 			*state = STATE_JOIN;

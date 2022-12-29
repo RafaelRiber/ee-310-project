@@ -45,7 +45,6 @@ void init_ships(void);
 // Game FSM
 
 typedef enum {
-    STATE_INIT,
 	STATE_HOME,
 	STATE_HOST,
     STATE_JOIN,
