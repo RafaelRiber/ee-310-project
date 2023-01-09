@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include "stdlib.h"
+#include "nds.h"
 //The 1990 Milton Bradley version
 enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};
 
@@ -16,10 +17,10 @@ enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};
 
 //conserve space by having one byte for board 
 //coordinates because why not.
-#define GET_X(coord) (coords & 0xF0)
-#define GET_Y(coord) (coords & 0xF)
-#define SET_X(coord, x) (coords & (x << 4))
-#define SET_Y(coord, y) (coords & y)
+#define GET_X(coord) ((coord & 0xF0) >> 4)
+#define GET_Y(coord) (coord & 0x0F)
+#define SET_X(coord, x) ((coord & 0x0F) | (x << 4))
+#define SET_Y(coord, y) ((coord & 0xF0) | (y))
 
 //get is_hit for coord i of hits bitmap
 #define GET_HIT(hits, i) ((hits >> i) & 0x1);
@@ -29,6 +30,7 @@ typedef struct ship {
     uint8_t len;
     uint8_t coords[CARRIER_SIZE]; //car size is the biggest ship so it will always be enough.
     uint8_t hits; //bit map to conserve space :)
+    u16 *sprite_buffs[CARRIER_SIZE];
 } ship;
 
 //game data
