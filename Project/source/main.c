@@ -10,18 +10,14 @@ int main(void) {
 	init_ships();
     configure_graphics();
 
-    //Initialize WiFi
-	//wifi_init();
-    //Position
-	printf("hello\n");
+
+	// Initialize game FSM
+	GameState state = STATE_HOME;
+
     while(1){
-
-		
+    	update_state(&state);
         update_sprites();
-    	swiWaitForVBlank();
-    	
-    
+        swiWaitForVBlank();
         oamUpdate(&oamMain);
-
     }
 }
