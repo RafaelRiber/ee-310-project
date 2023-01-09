@@ -7,9 +7,12 @@ int main(void) {
 
     consoleDemoInit();
 
-    //Initialize WiFi
-	wifi_init();
+
+	// Initialize game FSM
+	GameState state = STATE_HOME;
+
     while(1){
+    	update_state(&state);
         swiWaitForVBlank();
     }
 }
