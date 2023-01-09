@@ -42,6 +42,8 @@ void recv_enemy_ships(){
 }
 
 bool all_ships_placed() {
+	//TODO: rewrite this
+
     // Iterate through all ships and check if they have been placed on the board
 	for (int i = 0; i < NUM_SHIPS; i++) {
 	        if (player_ships[i].len == 0) {
@@ -66,6 +68,11 @@ bool all_ships_received() {
 }
 
 bool game_won() {
+
+	// A ship is sunk if (hits & 0x0F >> (8-len) =! 0)
+	// So the game is won if this is the case for all ships
+
+
 	// Check if all of the opponent's ships have been sunk
 	for (int i = 0; i < NUM_SHIPS; i++) {
 		for (int j = 0; j < enemy_ships[i].len; j++) {
@@ -98,6 +105,8 @@ void update_state(GameState* state) {
     case STATE_HOME:
 
     	//TODO: DETERMINE VALUE OF HOSTING BOOLEAN FROM USER INPUT
+
+
 
     	if (hosting) {
 			*state = STATE_HOST;
