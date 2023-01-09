@@ -26,6 +26,8 @@
 #include "battleship_sprite_2.h"
 #include "battleship_sprite_3.h"
 
+#include "battleship_title.h"
+
 #include "block.h"
 #include "battleships.h"
 #define GB_BG 0
@@ -86,6 +88,23 @@ unsigned int *SHIP_PALLENS[NUM_SHIPS] = {
 	[CARRIER] =CARRIER_SPRITE_PALLEN,
 };
 
+void display_gameboard() {
+	swiCopy(test_gameboardTiles, BG_TILE_RAM(GB_BG_TILE_BASE),
+			test_gameboardTilesLen / 2);
+	swiCopy(test_gameboardPal, BG_PALETTE, test_gameboardPalLen / 2);
+	swiCopy(test_gameboardMap, BG_MAP_RAM(GB_BG_MP_BASE),
+			test_gameboardMapLen / 2);
+}
+
+void display_title() {
+	swiCopy(battleship_titleTiles, BG_TILE_RAM(GB_BG_TILE_BASE),
+			battleship_titleTilesLen / 2);
+	swiCopy(battleship_titlePal, BG_PALETTE, test_gameboardPalLen / 2);
+	swiCopy(battleship_titleMap, BG_MAP_RAM(GB_BG_MP_BASE),
+			battleship_titleMapLen / 2);
+
+
+}
 
 /*
 main engine: mode 0 
@@ -98,12 +117,11 @@ void configure_graphics() {
 	REG_DISPCNT = MODE_0_2D | DISPLAY_BG0_ACTIVE;
 	VRAM_A_CR = VRAM_ENABLE | VRAM_A_MAIN_BG;
 
+	//SUB Engine
+	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_BG0_ACTIVE;
+
 	//BG0 configuration for the background
 	BGCTRL[GB_BG] = BG_COLOR_256 | BG_MAP_BASE(GB_BG_MP_BASE) | BG_TILE_BASE(GB_BG_TILE_BASE) | BG_32x32;
-	swiCopy(test_gameboardTiles, BG_TILE_RAM(GB_BG_TILE_BASE), test_gameboardTilesLen/2);
-	swiCopy(test_gameboardPal, BG_PALETTE, test_gameboardPalLen/2);
-	swiCopy(test_gameboardMap, BG_MAP_RAM(GB_BG_MP_BASE), test_gameboardMapLen/2);
-
 
     //sprites
 	
@@ -112,16 +130,15 @@ void configure_graphics() {
 	//Initialize sprite manager and the engine
 	oamInit(&oamMain, SpriteMapping_1D_32, false);
 
-
 	//Allocate all ship sprites.
-	int i,j; 
+	int i,j;
 	for (i = 0; i < NUM_SHIPS; i++) {
 		ship e_ship = enemy_ships[i];
 		ship p_ship = player_ships[i];
 		for (j = 0; j < e_ship.len; j ++) {
-		
-			allocate_sprite( 
-				&e_ship.sprite_buffs[j], 
+
+			allocate_sprite(
+				&e_ship.sprite_buffs[j],
 				SHIP_PALS[i][j], SHIP_PALLENS[i][j],
 				SHIP_TILES[i][j], SHIP_TILELENS[i][j],
 				1

@@ -122,6 +122,8 @@ bool game_lost() {
 void update_state(GameState* state) {
     switch (*state) {
     case STATE_HOME:
+    	display_title();
+
 
     	//TODO: DETERMINE VALUE OF HOSTING BOOLEAN FROM USER INPUT
 

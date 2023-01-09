@@ -16,7 +16,7 @@ int main(void) {
 
     while(1){
     	update_state(&state);
-        update_sprites();
+        //update_sprites();
         swiWaitForVBlank();
         oamUpdate(&oamMain);
     }
