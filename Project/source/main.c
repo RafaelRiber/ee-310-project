@@ -2,11 +2,10 @@
 #include <stdio.h>
 #include "message_protocol.h"
 #include "battleships.h"
-#include "graphics.h"
 
 int main(void) {
 
-    consoleDemoInit();
+    //consoleDemoInit();
 	init_ships();
     configure_graphics();
 

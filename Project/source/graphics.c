@@ -27,6 +27,9 @@
 #include "battleship_sprite_3.h"
 
 #include "battleship_title.h"
+#include "battleship_title_sub.h"
+
+#include "hosting_waiting_sub.h"
 
 #include "block.h"
 #include "battleships.h"
@@ -89,21 +92,32 @@ unsigned int *SHIP_PALLENS[NUM_SHIPS] = {
 };
 
 void display_gameboard() {
-	swiCopy(test_gameboardTiles, BG_TILE_RAM(GB_BG_TILE_BASE),
-			test_gameboardTilesLen / 2);
+	swiCopy(test_gameboardTiles, BG_TILE_RAM(GB_BG_TILE_BASE), test_gameboardTilesLen / 2);
 	swiCopy(test_gameboardPal, BG_PALETTE, test_gameboardPalLen / 2);
-	swiCopy(test_gameboardMap, BG_MAP_RAM(GB_BG_MP_BASE),
-			test_gameboardMapLen / 2);
+	swiCopy(test_gameboardMap, BG_MAP_RAM(GB_BG_MP_BASE), test_gameboardMapLen / 2);
+}
+
+void display_gameboard_sub() {
+	swiCopy(test_gameboardTiles, BG_TILE_RAM_SUB(GB_BG_TILE_BASE), test_gameboardTilesLen / 2);
+	swiCopy(test_gameboardPal, BG_PALETTE_SUB, test_gameboardPalLen / 2);
+	swiCopy(test_gameboardMap, BG_MAP_RAM_SUB(GB_BG_MP_BASE), test_gameboardMapLen / 2);
 }
 
 void display_title() {
-	swiCopy(battleship_titleTiles, BG_TILE_RAM(GB_BG_TILE_BASE),
-			battleship_titleTilesLen / 2);
+	swiCopy(battleship_titleTiles, BG_TILE_RAM(GB_BG_TILE_BASE), battleship_titleTilesLen / 2);
 	swiCopy(battleship_titlePal, BG_PALETTE, test_gameboardPalLen / 2);
-	swiCopy(battleship_titleMap, BG_MAP_RAM(GB_BG_MP_BASE),
-			battleship_titleMapLen / 2);
+	swiCopy(battleship_titleMap, BG_MAP_RAM(GB_BG_MP_BASE), battleship_titleMapLen / 2);
 
+	swiCopy(battleship_title_subTiles, BG_TILE_RAM_SUB(GB_BG_TILE_BASE), battleship_title_subTilesLen / 2);
+	swiCopy(battleship_title_subPal, BG_PALETTE_SUB, battleship_title_subPalLen / 2);
+	swiCopy(battleship_title_subMap, BG_MAP_RAM_SUB(GB_BG_MP_BASE), battleship_title_subMapLen / 2);
 
+}
+
+void display_waiting_for_enemy() {
+	swiCopy(hosting_waiting_subTiles, BG_TILE_RAM_SUB(GB_BG_TILE_BASE), hosting_waiting_subTilesLen / 2);
+	swiCopy(hosting_waiting_subPal, BG_PALETTE_SUB, hosting_waiting_subPalLen / 2);
+	swiCopy(hosting_waiting_subMap, BG_MAP_RAM_SUB(GB_BG_MP_BASE), hosting_waiting_subMapLen / 2);
 }
 
 /*
@@ -119,6 +133,8 @@ void configure_graphics() {
 
 	//SUB Engine
 	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_BG0_ACTIVE;
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_SUB_BG;
+	BGCTRL_SUB[GB_BG] = BG_COLOR_256 | BG_MAP_BASE(GB_BG_MP_BASE) | BG_TILE_BASE(GB_BG_TILE_BASE) | BG_32x32;
 
 	//BG0 configuration for the background
 	BGCTRL[GB_BG] = BG_COLOR_256 | BG_MAP_BASE(GB_BG_MP_BASE) | BG_TILE_BASE(GB_BG_TILE_BASE) | BG_32x32;
