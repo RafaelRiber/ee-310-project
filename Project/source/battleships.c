@@ -4,6 +4,7 @@
 ship player_ships[NUM_SHIPS];
 ship enemy_ships[NUM_SHIPS];
 
+target player_target;
 bool hosting = false;
 
 void init_ships(void) {
@@ -30,23 +31,35 @@ void init_ships(void) {
         
     }
 
-    enemy_ships[0].coords[0] = SET_X(enemy_ships[0].coords[0], 0);
-    enemy_ships[0].coords[0]  = SET_Y(enemy_ships[0].coords[0], 0);
+    player_ships[0].coords[0] = SET_X(player_ships[0].coords[0], 0);
+	player_ships[0].coords[0]  = SET_Y(player_ships[0].coords[0], 0);
 
-    enemy_ships[0].coords[1] = SET_X(enemy_ships[0].coords[1], 1);
-    enemy_ships[0].coords[1]  = SET_Y(enemy_ships[0].coords[1], 0);
+	player_ships[0].coords[1] = SET_X(player_ships[0].coords[1], 1);
+	player_ships[0].coords[1]  = SET_Y(player_ships[0].coords[1], 0);
 
-    enemy_ships[0].coords[2] = SET_X(enemy_ships[0].coords[2], 2);
-    enemy_ships[0].coords[2]  = SET_Y(enemy_ships[0].coords[2], 0);
+	player_ships[0].coords[2] = SET_X(player_ships[0].coords[2], 2);
+	player_ships[0].coords[2]  = SET_Y(player_ships[0].coords[2], 0);
 
-    enemy_ships[0].coords[3] = SET_X(enemy_ships[0].coords[3], 3);
-    enemy_ships[0].coords[3]  = SET_Y(enemy_ships[0].coords[3], 0);
+	player_ships[0].coords[3] = SET_X(player_ships[0].coords[3], 3);
+	player_ships[0].coords[3]  = SET_Y(player_ships[0].coords[3], 0);
 
-    enemy_ships[0].coords[4] = SET_X(enemy_ships[0].coords[4], 4);
-    enemy_ships[0].coords[4]  = SET_Y(enemy_ships[0].coords[4], 0);
-    printf("%d %d\n", GET_X(enemy_ships[0].coords[4]), GET_Y(enemy_ships[0].coords[4]));
-    return;
+	player_ships[0].coords[4] = SET_X(player_ships[0].coords[4], 4);
+	player_ships[0].coords[4]  = SET_Y(player_ships[0].coords[4], 0);
+	printf("%d %d\n", GET_X(player_ships[0].coords[4]), GET_Y(player_ships[0].coords[4]));
+	return;
 }
+void move_ship(ship * s, int x, int y, int is_horizontal) {
+	int i;
+	for (i = 0; i < s->len ; i ++) {
+		s->coords[i] = SET_X(s->coords[i], x);
+		s->coords[i] = SET_Y(s->coords[i], y);
+		if (is_horizontal) 
+			x ++;
+		else 
+			y ++;
+	}
+}
+
 
 // Game FSM
 void place_ships(){

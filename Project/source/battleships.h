@@ -10,6 +10,8 @@
 //The 1990 Milton Bradley version
 enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};
 
+#define BRD_LEN 10
+
 #define NUM_SHIPS 5
 
 #define CARRIER_SIZE 5
@@ -17,6 +19,8 @@ enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};
 #define CRUISER_SIZE 3
 #define SUBMARINE_SIZE 3
 #define DESTROYER_SIZE 2
+
+
 
 //conserve space by having one byte for board 
 //coordinates because why not.
@@ -36,6 +40,13 @@ typedef struct ship {
     u16 *sprite_buffs[CARRIER_SIZE];
 } ship;
 
+typedef struct target {
+    uint8_t coords;
+    u16 *sprite_buff;
+    uint8_t is_hidden;
+} target;
+
+extern target player_target;
 //game data
 extern ship player_ships[NUM_SHIPS];
 extern ship enemy_ships[NUM_SHIPS];
@@ -60,6 +71,12 @@ typedef enum {
     STATE_LOSE
 } GameState;
 
+typedef enum {
+    MAIN_MENU,
+    SHIP_PLACE, 
+    GAME
+} game_screens;
+#define NUM_SCREENS 3
 void place_ships();
 
 void recv_enemy_ships();
@@ -74,4 +91,5 @@ bool game_lost();
 
 void update_state(GameState* state);
 
+void move_ship(ship * s, int x, int y, int is_horizontal);
 #endif
