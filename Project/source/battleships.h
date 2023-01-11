@@ -4,6 +4,7 @@
 #include "stdint.h"
 #include "stdlib.h"
 #include "nds.h"
+#include "graphics.h"
 #include <stdbool.h>
 #include <string.h> /* memset */
 
@@ -73,10 +74,11 @@ typedef enum {
 
 typedef enum {
     MAIN_MENU,
+    HOST_WAIT,
     SHIP_PLACE, 
     GAME
 } game_screens;
-#define NUM_SCREENS 3
+#define NUM_SCREENS 4
 void place_ships();
 
 void recv_enemy_ships();

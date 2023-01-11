@@ -28,6 +28,12 @@
 
 #include "hit.h"
 #include "miss.h"
+#include "battleship_title.h"
+#include "battleship_title_sub.h"
+
+#include "hosting_waiting_sub.h"
+
+
 #include "block.h"
 #include "battleships.h"
 #define GB_BG 0
@@ -115,14 +121,14 @@ struct background {
 	int mapLen;
 };
 
-struct background main_backgrounds[3] = {
+struct background main_backgrounds[NUM_SCREENS] = {
 	[MAIN_MENU] = {
-	test_gameboardTiles,
-	test_gameboardTilesLen,
-	test_gameboardPal,
-	test_gameboardPalLen,
-	test_gameboardMap,
-	test_gameboardMapLen
+	battleship_titleTiles,
+	battleship_titleTilesLen,
+	battleship_titlePal,
+	battleship_titlePalLen,
+	battleship_titleMap,
+	battleship_titleMapLen
 	},
 
 	[SHIP_PLACE] = {
@@ -145,12 +151,21 @@ struct background main_backgrounds[3] = {
 
 struct background sub_backgrounds[NUM_SCREENS] = {
 	[MAIN_MENU] = {
-	test_gameboardTiles,
-	test_gameboardTilesLen,
-	test_gameboardPal,
-	test_gameboardPalLen,
-	test_gameboardMap,
-	test_gameboardMapLen
+	battleship_title_subTiles,
+	battleship_title_subTilesLen,
+	battleship_title_subPal,
+	battleship_title_subPalLen,
+	battleship_title_subMap,
+	battleship_title_subMapLen
+	},
+
+	[HOST_WAIT] = {
+	hosting_waiting_subTiles,
+	hosting_waiting_subTilesLen,
+	hosting_waiting_subPal,
+	hosting_waiting_subPalLen,
+	hosting_waiting_subMap,
+	hosting_waiting_subMapLen
 	},
 
 	[SHIP_PLACE] = {
@@ -180,6 +195,11 @@ void configure_graphics() {
     //MAIN engine
 	REG_DISPCNT = MODE_0_2D | DISPLAY_BG0_ACTIVE;
 	VRAM_A_CR = VRAM_ENABLE | VRAM_A_MAIN_BG;
+
+	//SUB Engine
+	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_BG0_ACTIVE;
+	VRAM_C_CR = VRAM_ENABLE | VRAM_C_SUB_BG;
+	BGCTRL_SUB[GB_BG] = BG_COLOR_256 | BG_MAP_BASE(GB_BG_MP_BASE) | BG_TILE_BASE(GB_BG_TILE_BASE) | BG_32x32;
 
 	//BG0 configuration for the background
 	BGCTRL[GB_BG] = BG_COLOR_256 | BG_MAP_BASE(GB_BG_MP_BASE) | BG_TILE_BASE(GB_BG_TILE_BASE) | BG_32x32;
@@ -233,14 +253,16 @@ void configure_graphics() {
 	memset(hits_misses_sprites, 0, sizeof(u16 *) * BRD_LEN * BRD_LEN);
 }
 
-void load_backgrounds(game_screens screen) {
+void load_backgrounds(int screen) {
 	if (screen > NUM_SCREENS || screen < 0)
 		return;
 
-	swiCopy(main_backgrounds[screen].tiles, BG_TILE_RAM(GB_BG_TILE_BASE), main_backgrounds[screen].tilesLen/2);
-	swiCopy(main_backgrounds[screen].pal, BG_PALETTE, main_backgrounds[screen].palLen/2);
-	swiCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MP_BASE), main_backgrounds[screen].mapLen/2);
-	
+	if (screen != HOST_WAIT) {
+		swiCopy(main_backgrounds[screen].tiles, BG_TILE_RAM(GB_BG_TILE_BASE), main_backgrounds[screen].tilesLen/2);
+		swiCopy(main_backgrounds[screen].pal, BG_PALETTE, main_backgrounds[screen].palLen/2);
+		swiCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MP_BASE), main_backgrounds[screen].mapLen/2);
+	}
+		
 	swiCopy(sub_backgrounds[screen].tiles, BG_TILE_RAM_SUB(GB_BG_TILE_BASE), sub_backgrounds[screen].tilesLen/2);
 	swiCopy(sub_backgrounds[screen].pal, BG_PALETTE_SUB, sub_backgrounds[screen].palLen/2);
 	swiCopy(sub_backgrounds[screen].map, BG_MAP_RAM_SUB(GB_BG_MP_BASE),sub_backgrounds[screen].mapLen/2);

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include "message_protocol.h"
 #include "battleships.h"
-#include "graphics.h"
 
 int main(void) {
 
@@ -19,7 +18,7 @@ int main(void) {
     y = 0;
     while(1){
     	update_state(&state);
-        update_ships();
+        //update_ships();
         swiWaitForVBlank();
         oamUpdate(&oamMain);
         move_ship(&player_ships[CARRIER],x, y, 1);
