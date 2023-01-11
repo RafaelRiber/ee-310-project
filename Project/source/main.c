@@ -8,12 +8,11 @@ int main(void) {
     //consoleDemoInit();
 	init_ships();
     configure_graphics();
-
 	// Initialize game FSM
 	GameState state = STATE_HOME;
     while(1){
     	update_state(&state);
-        //update_ships();
+        update_ships();
         swiWaitForVBlank();
         oamUpdate(&oamMain);
         oamUpdate(&oamSub);

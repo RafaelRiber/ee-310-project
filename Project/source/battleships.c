@@ -23,30 +23,17 @@ void init_ships(void) {
 
 
     int i;
-    int j;
+
     for (i = 0; i < NUM_SHIPS; i ++) {
         player_ships[i].hits = 0;
+		player_ships[i].is_hidden = 1;
         enemy_ships[i].hits = 0;
         memset(enemy_ships[i].coords, 0, CARRIER_SIZE);
         memset(player_ships[i].coords, 0, CARRIER_SIZE);
         
     }
 
-    player_ships[0].coords[0] = SET_X(player_ships[0].coords[0], 0);
-	player_ships[0].coords[0]  = SET_Y(player_ships[0].coords[0], 0);
-
-	player_ships[0].coords[1] = SET_X(player_ships[0].coords[1], 1);
-	player_ships[0].coords[1]  = SET_Y(player_ships[0].coords[1], 0);
-
-	player_ships[0].coords[2] = SET_X(player_ships[0].coords[2], 2);
-	player_ships[0].coords[2]  = SET_Y(player_ships[0].coords[2], 0);
-
-	player_ships[0].coords[3] = SET_X(player_ships[0].coords[3], 3);
-	player_ships[0].coords[3]  = SET_Y(player_ships[0].coords[3], 0);
-
-	player_ships[0].coords[4] = SET_X(player_ships[0].coords[4], 4);
-	player_ships[0].coords[4]  = SET_Y(player_ships[0].coords[4], 0);
-	printf("%d %d\n", GET_X(player_ships[0].coords[4]), GET_Y(player_ships[0].coords[4]));
+	player_target.is_hidden = 1;
 	return;
 }
 void set_ship_coords(ship * s, int x, int y, int is_horizontal) {

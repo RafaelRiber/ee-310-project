@@ -39,6 +39,7 @@ typedef struct ship {
     uint8_t coords[CARRIER_SIZE]; //car size is the biggest ship so it will always be enough.
     uint8_t hits; //bit map to conserve space :)
     u16 *sprite_buffs[CARRIER_SIZE];
+    uint8_t is_hidden;
 } ship;
 
 typedef struct target {

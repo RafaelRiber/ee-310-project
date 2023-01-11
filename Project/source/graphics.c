@@ -382,7 +382,7 @@ void update_ships() {
 				*(p_ship->sprite_buffs + j),			// Loaded graphic to display
 				is_horizontal,				// Affine rotation to use (-1 none)
 				false,			// Double size if rotating
-				false,			// Hide this sprite
+				p_ship->is_hidden,			// Hide this sprite
 				false, false,	// Horizontal or vertical flip
 				false			// Mosaic
     		);
