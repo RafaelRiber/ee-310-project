@@ -1,8 +1,11 @@
 #include "battleships.h"
+#include <nds.h>
+#include <stdio.h>
 
 ship player_ships[NUM_SHIPS];
 ship enemy_ships[NUM_SHIPS];
 
+target player_target;
 bool hosting = false;
 
 void init_ships(void) {
@@ -20,18 +23,49 @@ void init_ships(void) {
 
 
     int i;
+    int j;
     for (i = 0; i < NUM_SHIPS; i ++) {
         player_ships[i].hits = 0;
         enemy_ships[i].hits = 0;
         memset(enemy_ships[i].coords, 0, CARRIER_SIZE);
         memset(player_ships[i].coords, 0, CARRIER_SIZE);
+        
     }
-    return;
+
+    player_ships[0].coords[0] = SET_X(player_ships[0].coords[0], 0);
+	player_ships[0].coords[0]  = SET_Y(player_ships[0].coords[0], 0);
+
+	player_ships[0].coords[1] = SET_X(player_ships[0].coords[1], 1);
+	player_ships[0].coords[1]  = SET_Y(player_ships[0].coords[1], 0);
+
+	player_ships[0].coords[2] = SET_X(player_ships[0].coords[2], 2);
+	player_ships[0].coords[2]  = SET_Y(player_ships[0].coords[2], 0);
+
+	player_ships[0].coords[3] = SET_X(player_ships[0].coords[3], 3);
+	player_ships[0].coords[3]  = SET_Y(player_ships[0].coords[3], 0);
+
+	player_ships[0].coords[4] = SET_X(player_ships[0].coords[4], 4);
+	player_ships[0].coords[4]  = SET_Y(player_ships[0].coords[4], 0);
+	printf("%d %d\n", GET_X(player_ships[0].coords[4]), GET_Y(player_ships[0].coords[4]));
+	return;
 }
+void set_ship_coords(ship * s, int x, int y, int is_horizontal) {
+	int i;
+	for (i = 0; i < s->len ; i ++) {
+		s->coords[i] = SET_X(s->coords[i], x);
+		s->coords[i] = SET_Y(s->coords[i], y);
+		if (is_horizontal) 
+			x ++;
+		else 
+			y ++;
+	}
+}
+
 
 // Game FSM
 void place_ships(){
-
+	// Ships are moved on screen with:
+	//set_ship_coords(&player_ships[CARRIER],x, y, 0);
 
 	return;
 }
@@ -101,29 +135,43 @@ bool game_lost() {
 }
 
 void update_state(GameState* state) {
-    switch (*state) {
-    case STATE_HOME:
+	touchPosition touch;
+	touchRead(&touch);
+//	scanKeys();
+//	u16 keys = keysDown();
 
-    	//TODO: DETERMINE VALUE OF HOSTING BOOLEAN FROM USER INPUT
+	switch (*state) {
 
+	case STATE_HOME:
+		
+		load_backgrounds(MAIN_MENU);
 
-
-    	if (hosting) {
-			*state = STATE_HOST;
-		} else if (!hosting) {
+		// Handle "JOIN" touchscreen button
+		if (touch.px > JOIN_BUTTON_LEFT && touch.px < JOIN_BUTTON_RIGHT && touch.py < JOIN_BUTTON_BOTTOM && touch.py > JOIN_BUTTON_TOP) {
+			hosting = false;
 			*state = STATE_JOIN;
+		}
+		// Handle "HOST" touchscreen button
+		else if (touch.px > HOST_BUTTON_LEFT && touch.px < HOST_BUTTON_RIGHT && touch.py < HOST_BUTTON_BOTTOM && touch.py > HOST_BUTTON_TOP){
+			hosting = true;
+			*state = STATE_HOST;
 		}
     	break;
     case STATE_HOST:
     	// Wait for other player to join
+    	
+		load_backgrounds(HOST_WAIT);
     	// When player has joined, prompt to start and transition to start
     	// TODO : ADD USER INPUT HANDLING FOR STARTING GAME
     	// TODO : HANDLE WAITING FOR PLAYER
-    	*state = STATE_START_GAME;
+    	// *state = STATE_START_GAME;
     	break;
     case STATE_JOIN:
     	// TODO : Send join message and wait for start.
-    	*state = STATE_START_GAME;
+
+    	load_backgrounds(GAME);
+
+    	//*state = STATE_START_GAME;
     	break;
     case STATE_START_GAME:
     	// if hosting, go to place ships
@@ -168,6 +216,9 @@ void update_state(GameState* state) {
 
     case STATE_TAKING_TURN:
         // TODO: Handle user input
+
+    	 //new_shot_sprite(1, 5, 4);
+
         //if (turn_ended()) {
             *state = STATE_CHECKING_WIN;
         //}
