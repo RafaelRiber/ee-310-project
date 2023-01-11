@@ -93,5 +93,5 @@ bool game_lost();
 
 void update_state(GameState* state);
 
-void move_ship(ship * s, int x, int y, int is_horizontal);
+void set_ship_coords(ship * s, int x, int y, int is_horizontal);
 #endif

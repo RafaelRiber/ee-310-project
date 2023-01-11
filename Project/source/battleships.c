@@ -49,7 +49,7 @@ void init_ships(void) {
 	printf("%d %d\n", GET_X(player_ships[0].coords[4]), GET_Y(player_ships[0].coords[4]));
 	return;
 }
-void move_ship(ship * s, int x, int y, int is_horizontal) {
+void set_ship_coords(ship * s, int x, int y, int is_horizontal) {
 	int i;
 	for (i = 0; i < s->len ; i ++) {
 		s->coords[i] = SET_X(s->coords[i], x);
@@ -64,7 +64,8 @@ void move_ship(ship * s, int x, int y, int is_horizontal) {
 
 // Game FSM
 void place_ships(){
-
+	// Ships are moved on screen with:
+	//set_ship_coords(&player_ships[CARRIER],x, y, 0);
 
 	return;
 }
@@ -168,7 +169,7 @@ void update_state(GameState* state) {
     case STATE_JOIN:
     	// TODO : Send join message and wait for start.
 
-
+    	load_backgrounds(GAME);
 
     	//*state = STATE_START_GAME;
     	break;
@@ -215,6 +216,9 @@ void update_state(GameState* state) {
 
     case STATE_TAKING_TURN:
         // TODO: Handle user input
+
+    	 //new_shot_sprite(1, 5, 4);
+
         //if (turn_ended()) {
             *state = STATE_CHECKING_WIN;
         //}
