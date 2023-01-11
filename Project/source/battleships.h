@@ -4,6 +4,7 @@
 #include "stdint.h"
 #include "stdlib.h"
 #include "nds.h"
+#include "graphics.h"
 #include <stdbool.h>
 #include <string.h> /* memset */
 

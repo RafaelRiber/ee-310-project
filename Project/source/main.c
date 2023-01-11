@@ -2,11 +2,10 @@
 #include <stdio.h>
 #include "message_protocol.h"
 #include "battleships.h"
-#include "graphics.h"
 
 int main(void) {
 
-    consoleDemoInit();
+    //consoleDemoInit();
 	init_ships();
     configure_graphics();
 
@@ -16,7 +15,7 @@ int main(void) {
 
     while(1){
     	update_state(&state);
-        update_sprites();
+        //update_sprites();
         swiWaitForVBlank();
         oamUpdate(&oamMain);
     }

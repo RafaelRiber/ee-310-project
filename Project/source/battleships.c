@@ -1,6 +1,7 @@
 #include "battleships.h"
 #include <nds.h>
 #include <stdio.h>
+
 ship player_ships[NUM_SHIPS];
 ship enemy_ships[NUM_SHIPS];
 
@@ -120,29 +121,42 @@ bool game_lost() {
 }
 
 void update_state(GameState* state) {
-    switch (*state) {
-    case STATE_HOME:
+	touchPosition touch;
+	touchRead(&touch);
+//	scanKeys();
+//	u16 keys = keysDown();
 
-    	//TODO: DETERMINE VALUE OF HOSTING BOOLEAN FROM USER INPUT
+	switch (*state) {
 
+	case STATE_HOME:
+		display_title();
 
-
-    	if (hosting) {
-			*state = STATE_HOST;
-		} else if (!hosting) {
+		// Handle "JOIN" touchscreen button
+		if (touch.px > JOIN_BUTTON_LEFT && touch.px < JOIN_BUTTON_RIGHT && touch.py < JOIN_BUTTON_BOTTOM && touch.py > JOIN_BUTTON_TOP) {
+			hosting = false;
 			*state = STATE_JOIN;
+		}
+		// Handle "HOST" touchscreen button
+		else if (touch.px > HOST_BUTTON_LEFT && touch.px < HOST_BUTTON_RIGHT && touch.py < HOST_BUTTON_BOTTOM && touch.py > HOST_BUTTON_TOP){
+			hosting = true;
+			*state = STATE_HOST;
 		}
     	break;
     case STATE_HOST:
     	// Wait for other player to join
+    	display_waiting_for_enemy();
     	// When player has joined, prompt to start and transition to start
     	// TODO : ADD USER INPUT HANDLING FOR STARTING GAME
     	// TODO : HANDLE WAITING FOR PLAYER
-    	*state = STATE_START_GAME;
+    	// *state = STATE_START_GAME;
     	break;
     case STATE_JOIN:
     	// TODO : Send join message and wait for start.
-    	*state = STATE_START_GAME;
+
+    	display_gameboard_sub();
+
+
+    	//*state = STATE_START_GAME;
     	break;
     case STATE_START_GAME:
     	// if hosting, go to place ships
