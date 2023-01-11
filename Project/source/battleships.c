@@ -60,6 +60,10 @@ void set_ship_coords(ship * s, int x, int y, int is_horizontal) {
 			y ++;
 	}
 }
+void set_target_coords(int x, int y) {
+	player_target.coords  = SET_X(player_target.coords, x);
+	player_target.coords = SET_Y(player_target.coords, y);
+}
 
 
 // Game FSM

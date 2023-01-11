@@ -94,4 +94,5 @@ bool game_lost();
 void update_state(GameState* state);
 
 void set_ship_coords(ship * s, int x, int y, int is_horizontal);
+void set_target_coords(int x, int y);
 #endif
