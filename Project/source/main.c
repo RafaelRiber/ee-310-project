@@ -8,6 +8,7 @@ int main(void) {
     //consoleDemoInit();
 	init_ships();
     configure_graphics();
+    load_backgrounds(MAIN_MENU);
 	// Initialize game FSM
 	GameState state = STATE_HOME;
     while(1){

@@ -233,7 +233,7 @@ void configure_graphics() {
 	
 	//Allocate all ship sprites.
 	int i,j; 
-	for (i = 0; i < NUM_SHIPS; i++) {
+	for (i = 0; i < 1; i++) {
 		ship * p_ship = player_ships + i;
 		//ship p_ship = player_ships[i];
 		for (j = 0; j < p_ship->len; j ++) {
@@ -359,7 +359,7 @@ void update_ships() {
 	
 	int is_horizontal;
 	//SUB ENGINE: PLAYER SHIPS
-	for (i =0; i< NUM_SHIPS; i ++) {
+	for (i =0; i< 1; i ++) {
 		
 		ship *p_ship = player_ships + i;
 		if (GET_X(p_ship->coords[0]) < GET_X(p_ship->coords[1]))

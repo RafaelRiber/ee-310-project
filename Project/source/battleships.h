@@ -40,6 +40,7 @@ typedef struct ship {
     uint8_t hits; //bit map to conserve space :)
     u16 *sprite_buffs[CARRIER_SIZE];
     uint8_t is_hidden;
+    uint8_t is_horizontal;
 } ship;
 
 typedef struct target {
@@ -94,6 +95,6 @@ bool game_lost();
 
 void update_state(GameState* state);
 
-void set_ship_coords(ship * s, int x, int y, int is_horizontal);
+void set_ship_coords(ship * s, int x, int y);
 void set_target_coords(int x, int y);
 #endif

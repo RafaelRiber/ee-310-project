@@ -27,26 +27,32 @@ void init_ships(void) {
     for (i = 0; i < NUM_SHIPS; i ++) {
         player_ships[i].hits = 0;
 		player_ships[i].is_hidden = 1;
+		player_ships[i].is_horizontal = 1;
         enemy_ships[i].hits = 0;
         memset(enemy_ships[i].coords, 0, CARRIER_SIZE);
         memset(player_ships[i].coords, 0, CARRIER_SIZE);
+
+        // Initial coords of ship are (0,0)
+        set_ship_coords(&player_ships[i], 0, 0);
         
     }
 
 	player_target.is_hidden = 1;
 	return;
 }
-void set_ship_coords(ship * s, int x, int y, int is_horizontal) {
-	int i;
-	for (i = 0; i < s->len ; i ++) {
-		s->coords[i] = SET_X(s->coords[i], x);
-		s->coords[i] = SET_Y(s->coords[i], y);
-		if (is_horizontal) 
-			x ++;
-		else 
-			y ++;
-	}
+void set_ship_coords(ship * s, int x, int y) {
+    int i;
+    for (i = 0; i < s->len ; i ++) {
+        if (s->is_horizontal) {
+            s->coords[i] = SET_X(s->coords[i], x + i);
+            s->coords[i] = SET_Y(s->coords[i], y);
+        } else {
+            s->coords[i] = SET_X(s->coords[i], x);
+            s->coords[i] = SET_Y(s->coords[i], y + i);
+        }
+    }
 }
+
 void set_target_coords(int x, int y) {
 	player_target.coords  = SET_X(player_target.coords, x);
 	player_target.coords = SET_Y(player_target.coords, y);
@@ -54,12 +60,67 @@ void set_target_coords(int x, int y) {
 
 
 // Game FSM
-void place_ships(){
-	// Ships are moved on screen with:
-	//set_ship_coords(&player_ships[CARRIER],x, y, 0);
 
-	return;
+void place_ships() {
+    scanKeys();
+    u16 keys = keysDown();
+    int ship_count = 0;
+
+    if (player_ships[ship_count].is_hidden == 1)
+        player_ships[ship_count].is_hidden = 0;
+
+    int x_current = GET_X(player_ships[ship_count].coords[0]);
+    int y_current = GET_Y(player_ships[ship_count].coords[0]);
+
+    switch (keys) {
+    case KEY_UP:
+        if (y_current > 0)
+            set_ship_coords(&player_ships[ship_count], x_current, y_current - 1);
+        break;
+    case KEY_DOWN:
+        if(player_ships[ship_count].is_horizontal){
+            if (y_current < 9) set_ship_coords(&player_ships[ship_count], x_current, y_current + 1);
+        }
+        else {
+            if (y_current < 10 - player_ships[ship_count].len) set_ship_coords(&player_ships[ship_count], x_current, y_current + 1);
+        }
+        break;
+    case KEY_RIGHT:
+        if(player_ships[ship_count].is_horizontal){
+            if (x_current < 10 - player_ships[ship_count].len) set_ship_coords(&player_ships[ship_count], x_current + 1, y_current);
+        }
+        else {
+            if (x_current < 9) set_ship_coords(&player_ships[ship_count], x_current + 1, y_current);
+        }
+        break;
+    case KEY_LEFT:
+        if(player_ships[ship_count].is_horizontal){
+            if (x_current > 0) set_ship_coords(&player_ships[ship_count], x_current - 1, y_current);
+        }
+        else {
+            if (x_current > 0) set_ship_coords(&player_ships[ship_count], x_current - 1, y_current);
+        }
+        break;
+    case KEY_B:
+    	player_ships[ship_count].is_horizontal = !(player_ships[ship_count].is_horizontal);
+
+    	// Handle if ship is too close to a wall when rotating
+        if(player_ships[ship_count].is_horizontal){
+            if (x_current > 10 - player_ships[ship_count].len)
+                x_current = 10 - player_ships[ship_count].len;
+        }
+        else{
+            if(y_current > 10 - player_ships[ship_count].len)
+                y_current = 10 - player_ships[ship_count].len;
+        }
+        set_ship_coords(&player_ships[ship_count], x_current, y_current);
+        break;
+    }
 }
+
+
+
+
 
 void recv_enemy_ships(){
 
@@ -128,22 +189,19 @@ bool game_lost() {
 void update_state(GameState* state) {
 	touchPosition touch;
 	touchRead(&touch);
-//	scanKeys();
-//	u16 keys = keysDown();
 
 	switch (*state) {
 
 	case STATE_HOME:
-		
-		load_backgrounds(MAIN_MENU);
-
-		// Handle "JOIN" touchscreen button
-		if (touch.px > JOIN_BUTTON_LEFT && touch.px < JOIN_BUTTON_RIGHT && touch.py < JOIN_BUTTON_BOTTOM && touch.py > JOIN_BUTTON_TOP) {
+		scanKeys();
+		u16 keys = keysDown();
+		// Handle "JOIN" touchscreen and button (A KEY)
+		if (keys == KEY_A || touch.px > JOIN_BUTTON_LEFT && touch.px < JOIN_BUTTON_RIGHT && touch.py < JOIN_BUTTON_BOTTOM && touch.py > JOIN_BUTTON_TOP) {
 			hosting = false;
 			*state = STATE_JOIN;
 		}
 		// Handle "HOST" touchscreen button
-		else if (touch.px > HOST_BUTTON_LEFT && touch.px < HOST_BUTTON_RIGHT && touch.py < HOST_BUTTON_BOTTOM && touch.py > HOST_BUTTON_TOP){
+		else if (keys == KEY_B || touch.px > HOST_BUTTON_LEFT && touch.px < HOST_BUTTON_RIGHT && touch.py < HOST_BUTTON_BOTTOM && touch.py > HOST_BUTTON_TOP){
 			hosting = true;
 			*state = STATE_HOST;
 		}
@@ -151,11 +209,12 @@ void update_state(GameState* state) {
     case STATE_HOST:
     	// Wait for other player to join
     	
-		load_backgrounds(HOST_WAIT);
+		//load_backgrounds(HOST_WAIT);
     	// When player has joined, prompt to start and transition to start
     	// TODO : ADD USER INPUT HANDLING FOR STARTING GAME
     	// TODO : HANDLE WAITING FOR PLAYER
-    	// *state = STATE_START_GAME;
+		load_backgrounds(GAME);
+    	*state = STATE_PLACE_SHIPS;
     	break;
     case STATE_JOIN:
     	// TODO : Send join message and wait for start.
@@ -175,16 +234,17 @@ void update_state(GameState* state) {
     	}
     	break;
     case STATE_PLACE_SHIPS:
+
 		place_ships();
-		if (all_ships_placed()) {
-			//TODO: ADD send_ships();
-			if (hosting){
-				*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
-			}
-			else {
-				*state = STATE_WAITING_FOR_TURN;
-			}
-		}
+//		if (all_ships_placed()) {
+//			//TODO: ADD send_ships();
+//			if (hosting){
+//				*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
+//			}
+//			else {
+//				*state = STATE_WAITING_FOR_TURN;
+//			}
+//		}
     	break;
     case STATE_WAIT_FOR_ENEMY_PLACEMENT:
     	recv_enemy_ships();
