@@ -21,9 +21,9 @@
 #define HIT_MISS_SPRITE_IDX(i) (1 + NUM_SHIP_SPRITES + i)
 #define TARGET_SPRITE_IDX(i) (i)
 
-#define TARGET_SPRITE_OFFSET 20
+#define TARGET_SPRITE_OFFSET 19
 #define MISS_SPRITE_OFFSET 18
-#define HIT_SPRITE_OFFSET 19
+#define HIT_SPRITE_OFFSET 17
 
 uint8 num_hits_misses; 
 uint8 num_ship_sprites;
