@@ -3,38 +3,12 @@
 #include "stdio.h"
 
 #include "test_gameboard.h"
-#include "target.h"
-#include "carrier_sprite_0.h"
-#include "carrier_sprite_1.h"
-#include "carrier_sprite_2.h"
-#include "carrier_sprite_3.h"
-#include "carrier_sprite_4.h"
 
-#include "destroyer_sprite_0.h"
-#include "destroyer_sprite_1.h"
-
-#include "submarine_sprite_0.h"
-#include "submarine_sprite_1.h"
-#include "submarine_sprite_2.h"
-
-#include "cruiser_sprite_0.h"
-#include "cruiser_sprite_1.h"
-#include "cruiser_sprite_2.h"
- 
-#include "battleship_sprite_0.h"
-#include "battleship_sprite_1.h"
-#include "battleship_sprite_2.h"
-#include "battleship_sprite_3.h"
-
-#include "hit.h"
-#include "miss.h"
 #include "battleship_title.h"
 #include "battleship_title_sub.h"
-
 #include "hosting_waiting_sub.h"
 
-
-#include "block.h"
+#include "spritemap.h"
 #include "battleships.h"
 #define GB_BG 0
 #define GB_BG_MP_BASE 0 
@@ -42,64 +16,14 @@
 
 
 
-#define NUM_SHIP_SPRITES (CARRIER_SIZE + BATTLESHIP_SIZE + CRUISER_SIZE + SUBMARINE_SIZE + DESTROYER_SIZE)
-#define SHIP_SPRITE_IDX(i) (i + 1)
+#define NUM_SHIP_SPRITES (CARRIER_SIZE * NUM_SHIPS)
+#define SHIP_SPRITE_IDX(i, j) (i*CARRIER_SIZE + j)
 #define HIT_MISS_SPRITE_IDX(i) (1 + NUM_SHIP_SPRITES + i)
 #define TARGET_SPRITE_IDX(i) (i)
 
-
-unsigned int *BATTLESHIP_SPRITE_TILES[BATTLESHIP_SIZE] = {battleship_sprite_0Tiles,battleship_sprite_1Tiles,battleship_sprite_2Tiles,battleship_sprite_3Tiles};
-unsigned int *CRUISER_SPRITE_TILES[CRUISER_SIZE] = {cruiser_sprite_0Tiles, cruiser_sprite_1Tiles, cruiser_sprite_2Tiles};
-unsigned int *SUBMARINE_SPRITE_TILES[SUBMARINE_SIZE] = {submarine_sprite_0Tiles,submarine_sprite_1Tiles,submarine_sprite_2Tiles};
-unsigned int *DESTROYER_SPRITE_TILES[DESTROYER_SIZE] = {destroyer_sprite_0Tiles, destroyer_sprite_1Tiles};
-unsigned int *CARRIER_SPRITE_TILES[CARRIER_SIZE] = {carrier_sprite_0Tiles, carrier_sprite_1Tiles, carrier_sprite_2Tiles, carrier_sprite_3Tiles, carrier_sprite_4Tiles};
-unsigned int **SHIP_TILES[NUM_SHIPS] = {
-	[BATTLESHIP] = BATTLESHIP_SPRITE_TILES,
-	[CRUISER] = CRUISER_SPRITE_TILES,
-	[SUBMARINE] = SUBMARINE_SPRITE_TILES,
-	[DESTROYER] = DESTROYER_SPRITE_TILES,
-	[CARRIER] = CARRIER_SPRITE_TILES,
-};
-
-
-unsigned int BATTLESHIP_SPRITE_TILESLEN[BATTLESHIP_SIZE] = {battleship_sprite_0TilesLen,battleship_sprite_1TilesLen,battleship_sprite_2TilesLen,battleship_sprite_3TilesLen};
-unsigned int CRUISER_SPRITE_TILESLEN[CRUISER_SIZE] = {cruiser_sprite_0TilesLen, cruiser_sprite_1TilesLen, cruiser_sprite_2TilesLen};
-unsigned int SUBMARINE_SPRITE_TILESLEN[SUBMARINE_SIZE] = {submarine_sprite_0TilesLen,submarine_sprite_1TilesLen,submarine_sprite_2TilesLen};
-unsigned int DESTROYER_SPRITE_TILESLEN[DESTROYER_SIZE] = {destroyer_sprite_0TilesLen, destroyer_sprite_1TilesLen};
-unsigned int CARRIER_SPRITE_TILESLEN[CARRIER_SIZE] = {carrier_sprite_0TilesLen, carrier_sprite_1TilesLen, carrier_sprite_2TilesLen, carrier_sprite_3TilesLen,  carrier_sprite_4TilesLen};
-
-unsigned int *SHIP_TILELENS[NUM_SHIPS] = {
-	[BATTLESHIP] = BATTLESHIP_SPRITE_TILESLEN,
-	[CRUISER] = CRUISER_SPRITE_TILESLEN,
-	[SUBMARINE] = SUBMARINE_SPRITE_TILESLEN,
-	[DESTROYER] = DESTROYER_SPRITE_TILESLEN,
-	[CARRIER] = CARRIER_SPRITE_TILESLEN,
-};
-
-unsigned short *BATTLESHIP_SPRITE_PAL[BATTLESHIP_SIZE] = {battleship_sprite_0Pal,battleship_sprite_1Pal,battleship_sprite_2Pal,battleship_sprite_3Pal};
-unsigned short *CRUISER_SPRITE_PAL[CRUISER_SIZE] = {cruiser_sprite_0Pal, cruiser_sprite_1Pal, cruiser_sprite_2Pal};
-unsigned short *SUBMARINE_SPRITE_PAL[SUBMARINE_SIZE] = {submarine_sprite_0Pal,submarine_sprite_1Pal,submarine_sprite_2Pal};
-unsigned short *DESTROYER_SPRITE_PAL[DESTROYER_SIZE] ={destroyer_sprite_0Pal, destroyer_sprite_1Pal};
-unsigned short *CARRIER_SPRITE_PAL[CARRIER_SIZE] = {carrier_sprite_0Pal, carrier_sprite_1Pal, carrier_sprite_2Pal, carrier_sprite_3Pal, carrier_sprite_4Pal};
-unsigned short **SHIP_PALS[NUM_SHIPS] = {
-	[BATTLESHIP] = BATTLESHIP_SPRITE_PAL,
-	[CRUISER] =CRUISER_SPRITE_PAL,
-	[SUBMARINE]= SUBMARINE_SPRITE_PAL,
-	[DESTROYER]= DESTROYER_SPRITE_PAL,
-	[CARRIER] =CARRIER_SPRITE_PAL,
-};
-unsigned int BATTLESHIP_SPRITE_PALLEN[BATTLESHIP_SIZE] = {battleship_sprite_0PalLen,battleship_sprite_1PalLen,battleship_sprite_2PalLen,battleship_sprite_3PalLen};
-unsigned int CRUISER_SPRITE_PALLEN[CRUISER_SIZE] = {cruiser_sprite_0PalLen, cruiser_sprite_1PalLen, cruiser_sprite_2PalLen};
-unsigned int SUBMARINE_SPRITE_PALLEN[SUBMARINE_SIZE] = {submarine_sprite_0PalLen,submarine_sprite_1PalLen,submarine_sprite_2PalLen};
-unsigned int DESTROYER_SPRITE_PALLEN[DESTROYER_SIZE] ={destroyer_sprite_0PalLen, destroyer_sprite_1PalLen};
-unsigned int CARRIER_SPRITE_PALLEN[CARRIER_SIZE] = {carrier_sprite_0PalLen, carrier_sprite_1PalLen, carrier_sprite_2PalLen, carrier_sprite_3PalLen,  carrier_sprite_4PalLen};
-unsigned int *SHIP_PALLENS[NUM_SHIPS] = {
-	[BATTLESHIP] = BATTLESHIP_SPRITE_PALLEN,
-	[CRUISER] = CRUISER_SPRITE_PALLEN,
-	[SUBMARINE]= SUBMARINE_SPRITE_PALLEN,
-	[DESTROYER]= DESTROYER_SPRITE_PALLEN,
-	[CARRIER] =CARRIER_SPRITE_PALLEN,
-};
+#define TARGET_SPRITE_OFFSET 19
+#define MISS_SPRITE_OFFSET 18
+#define HIT_SPRITE_OFFSET 17
 
 uint8 num_hits_misses; 
 uint8 num_ship_sprites;
@@ -225,12 +149,16 @@ void configure_graphics() {
 	oamInit(&oamSub, SpriteMapping_1D_32, false);
 
 	//target sprite
-	allocate_sprite(player_target.sprite_buff, targetPal, targetPalLen, targetTiles, targetTilesLen, 1);
+	allocate_sprite(&player_target.sprite_buff, spritemapTiles + TARGET_SPRITE_OFFSET*64, 256, 1);
 	
 	
 	oamRotateScale(&oamMain, 0, degreesToAngle(-90), intToFixed(1, 8), intToFixed(1, 8));
 	oamRotateScale(&oamSub, 0, degreesToAngle(-90), intToFixed(1, 8), intToFixed(1, 8));
 	
+	
+	dmaCopy(spritemapPal, (u16*)SPRITE_PALETTE, spritemapPalLen);
+	dmaCopy(spritemapPal, (u16*)SPRITE_PALETTE_SUB, spritemapPalLen);
+	int scount = 0;
 	//Allocate all ship sprites.
 	int i,j; 
 	for (i = 0; i < NUM_SHIPS; i++) {
@@ -240,10 +168,9 @@ void configure_graphics() {
 				
 			allocate_sprite( 
 				p_ship->sprite_buffs + j, 
-				SHIP_PALS[i][j], SHIP_PALLENS[i][j],
-				SHIP_TILES[i][j], SHIP_TILELENS[i][j],
-				0
+				spritemapTiles + 64*scount,256,0
 			);
+			scount++;
 			
 		}
 	}
@@ -276,11 +203,11 @@ void new_shot_sprite(int isHit, int x, int y){
 	num_hits_misses += 1;
 	hits_misses_sprites[num_hits_misses] = gfx;
 	if (isHit) {
-		dmaCopy(hitTiles, gfx,hitTilesLen);
+		dmaCopy(spritemapTiles+64*HIT_SPRITE_OFFSET, gfx,256);
 		
 	}
 	else {
-		dmaCopy(missTiles, gfx,missTilesLen);
+		dmaCopy(spritemapTiles+64*MISS_SPRITE_OFFSET, gfx,256);
 	}
 
 	int sx = (x * 16) + 48;
@@ -309,14 +236,13 @@ void clear_shots() {
 }
 //todo: merge all sprites palletes (from grit) to one sprite pallete.
 uint16_t sprite_pallete_memory_usage = 0;
-void allocate_sprite(u16 ** gfx, unsigned short * pal, unsigned int palLen, unsigned int * tiles, unsigned int tilesLen, char isMain ) {
+void allocate_sprite(u16 ** gfx, unsigned int * tiles, unsigned int tilesLen, char isMain ) {
 
 	OamState * oam = &oamMain;
-	u16* sprite_palette = (u16*)SPRITE_PALETTE;
-	if (!isMain) {
+
+	if (!isMain)
 		oam = &oamSub;
-		sprite_palette = (u16*)SPRITE_PALETTE_SUB;
-	}
+	
 		
 
 	*gfx = oamAllocateGfx(oam, SpriteSize_16x16, SpriteColorFormat_256Color);
@@ -329,7 +255,7 @@ void allocate_sprite(u16 ** gfx, unsigned short * pal, unsigned int palLen, unsi
 	//memory_usage += (SpriteSize_16x16 & 0xFFF) << 5;
 	//Copy data for the graphic (palette and bitmap)
 
-	dmaCopy(pal, sprite_palette, palLen);
+	
 	dmaCopy(tiles, *gfx, tilesLen);
 
 	//sprite_pallete_memory_usage += palLen;
@@ -373,7 +299,7 @@ void update_ships() {
 			int y = (GET_Y(p_ship->coords[j]) * 16) + 16;
 	
 			oamSet(&oamSub, 	// oam handler
-				SHIP_SPRITE_IDX((i+1)*j),				// Number of sprite
+				SHIP_SPRITE_IDX(i,j),				// Number of sprite
 				x, y,			// Coordinates
 				0,				// Priority
 				0,				// Palette to use

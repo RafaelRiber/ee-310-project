@@ -9,7 +9,7 @@ int main(void) {
 	init_ships();
     configure_graphics();
 	// Initialize game FSM
-	GameState state = STATE_HOME;
+	GameState state = STATE_HOME; 
     while(1){
     	update_state(&state);
         update_ships();

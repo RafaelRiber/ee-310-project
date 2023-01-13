@@ -21,6 +21,8 @@ enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};
 #define SUBMARINE_SIZE 3
 #define DESTROYER_SIZE 2
 
+extern const int SHIP_SIZES[NUM_SHIPS];
+
 
 
 //conserve space by having one byte for board 
