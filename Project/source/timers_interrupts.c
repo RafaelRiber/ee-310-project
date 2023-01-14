@@ -7,7 +7,7 @@
 #include "timers_interrupts.h"
 
 void blink_interrupt(){
-	//player_ships[place_ship_count].is_hidden = !player_ships[place_ship_count].is_hidden;
+	player_ships[place_ship_count].is_hidden = !player_ships[place_ship_count].is_hidden;
 }
 
 void configure_timers() {

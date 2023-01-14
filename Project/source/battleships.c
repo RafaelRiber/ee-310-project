@@ -91,7 +91,7 @@ void place_ships() {
     scanKeys();
     u16 keys = keysDown();
 
-    player_ships[0].is_hidden = 0;
+    //player_ships[0].is_hidden = 0;
 
     int x_current = GET_X(player_ships[place_ship_count].coords[0]);
     int y_current = GET_Y(player_ships[place_ship_count].coords[0]);
@@ -152,6 +152,13 @@ void place_ships() {
     }
     irqDisable(IRQ_TIMER0);
 }
+
+//void place_ships_test(){
+//	for (int i=0; i<NUM_SHIPS; i++){
+//			player_ships[i].is_hidden = 0;
+//			set_ship_coords(&player_ships[i], 0, i);
+//		}
+//}
 
 
 
