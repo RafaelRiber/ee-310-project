@@ -10,7 +10,7 @@ int main(void) {
     configure_graphics();
     load_backgrounds(MAIN_MENU);
 	// Initialize game FSM
-	GameState state = STATE_HOME;
+	GameState state = STATE_HOME; 
     while(1){
     	update_state(&state);
         update_ships();

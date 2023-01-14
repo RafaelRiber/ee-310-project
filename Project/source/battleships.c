@@ -5,6 +5,14 @@
 ship player_ships[NUM_SHIPS];
 ship enemy_ships[NUM_SHIPS];
 
+const int SHIP_SIZES[NUM_SHIPS]= {
+    [CARRIER] = CARRIER_SIZE,
+    [BATTLESHIP] = BATTLESHIP_SIZE,
+    [CRUISER] = CRUISER_SIZE,
+    [SUBMARINE] = SUBMARINE_SIZE,
+    [DESTROYER] = DESTROYER_SIZE
+};
+
 target player_target;
 bool hosting = false;
 
