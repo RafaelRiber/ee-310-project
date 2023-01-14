@@ -13,7 +13,7 @@
 #include "soundbank.h"
 #include "soundbank_bin.h"
 
-void Audio_Init();
+void init_audio();
 //void Audio_PlaySoundEX( int i );
 void play_music();
 

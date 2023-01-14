@@ -53,7 +53,7 @@ void set_ship_coords(ship * s, int x, int y) {
     int i;
     for (i = 0; i < s->len ; i ++) {
         if (s->is_horizontal) {
-            s->coords[i] = SET_X(s->coords[i], x + i);
+            s->coords[i] = SET_X(s->coords[i], (x + i));
             s->coords[i] = SET_Y(s->coords[i], y);
         } else {
             s->coords[i] = SET_X(s->coords[i], x);
@@ -217,13 +217,13 @@ void update_state(GameState* state) {
 		scanKeys();
 		u16 keys = keysDown();
 		// Handle "JOIN" touchscreen and button (A KEY)
-		if (keys == KEY_A || touch.px > JOIN_BUTTON_LEFT && touch.px < JOIN_BUTTON_RIGHT && touch.py < JOIN_BUTTON_BOTTOM && touch.py > JOIN_BUTTON_TOP) {
+		if (keys == KEY_A || (touch.px > JOIN_BUTTON_LEFT && touch.px < JOIN_BUTTON_RIGHT && touch.py < JOIN_BUTTON_BOTTOM && touch.py > JOIN_BUTTON_TOP)) {
 			play_sound_effect(SFX_GUN);
 			hosting = false;
 			*state = STATE_JOIN;
 		}
 		// Handle "HOST" touchscreen button
-		else if (keys == KEY_B || touch.px > HOST_BUTTON_LEFT && touch.px < HOST_BUTTON_RIGHT && touch.py < HOST_BUTTON_BOTTOM && touch.py > HOST_BUTTON_TOP){
+		else if (keys == KEY_B || (touch.px > HOST_BUTTON_LEFT && touch.px < HOST_BUTTON_RIGHT && touch.py < HOST_BUTTON_BOTTOM && touch.py > HOST_BUTTON_TOP)){
 			play_sound_effect(SFX_GUN);
 			hosting = true;
 			*state = STATE_HOST;
