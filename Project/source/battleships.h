@@ -6,6 +6,7 @@
 #include "nds.h"
 #include "graphics.h"
 #include "timers_interrupts.h"
+#include "sounds.h"
 #include <stdbool.h>
 #include <string.h> /* memset */
 

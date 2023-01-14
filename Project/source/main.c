@@ -7,7 +7,9 @@ int main(void) {
 
     //consoleDemoInit();
 	init_ships();
-	configure_timers();
+	init_audio();
+	//play_music();
+	//configure_timers();
     configure_graphics();
     load_backgrounds(MAIN_MENU);
 	// Initialize game FSM
