@@ -5,6 +5,7 @@
 #include "stdlib.h"
 #include "nds.h"
 #include "graphics.h"
+#include "timers_interrupts.h"
 #include <stdbool.h>
 #include <string.h> /* memset */
 
@@ -22,7 +23,7 @@ enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};
 #define DESTROYER_SIZE 2
 
 extern const int SHIP_SIZES[NUM_SHIPS];
-
+extern int place_ship_count;
 
 
 //conserve space by having one byte for board 
@@ -83,11 +84,11 @@ typedef enum {
     GAME
 } game_screens;
 #define NUM_SCREENS 4
+
+bool is_ship_overlapped();
 void place_ships();
 
 void recv_enemy_ships();
-
-bool all_ships_placed();
 
 bool all_ships_received();
 

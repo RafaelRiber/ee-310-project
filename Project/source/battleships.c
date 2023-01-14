@@ -15,6 +15,7 @@ const int SHIP_SIZES[NUM_SHIPS]= {
 
 target player_target;
 bool hosting = false;
+int place_ship_count = 0;
 
 void init_ships(void) {
     player_ships[CARRIER].len = CARRIER_SIZE;
@@ -42,7 +43,7 @@ void init_ships(void) {
 
         // Initial coords of ship are (0,0)
         set_ship_coords(&player_ships[i], 0, 0);
-        
+
     }
 
 	player_target.is_hidden = 1;
@@ -62,68 +63,91 @@ void set_ship_coords(ship * s, int x, int y) {
 }
 
 void set_target_coords(int x, int y) {
-	player_target.coords  = SET_X(player_target.coords, x);
+	player_target.coords = SET_X(player_target.coords, x);
 	player_target.coords = SET_Y(player_target.coords, y);
 }
 
 
 // Game FSM
 
+// Function to check if ship overlaps with previously placed ships
+bool is_ship_overlapped(int ship_index) {
+    int i, j, k;
+    for(i = 0; i < ship_index; i++) {
+        if(i == ship_index) continue;
+        for(j = 0; j < SHIP_SIZES[i]; j++) {
+            for (k = 0; k < SHIP_SIZES[ship_index]; k++) {
+                if(player_ships[i].coords[j] == player_ships[ship_index].coords[k])
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+
 void place_ships() {
+	irqEnable(IRQ_TIMER0);
     scanKeys();
     u16 keys = keysDown();
-    int ship_count = 0;
 
-    if (player_ships[ship_count].is_hidden == 1)
-        player_ships[ship_count].is_hidden = 0;
-
-    int x_current = GET_X(player_ships[ship_count].coords[0]);
-    int y_current = GET_Y(player_ships[ship_count].coords[0]);
+    int x_current = GET_X(player_ships[place_ship_count].coords[0]);
+    int y_current = GET_Y(player_ships[place_ship_count].coords[0]);
 
     switch (keys) {
     case KEY_UP:
-        if (y_current > 0)
-            set_ship_coords(&player_ships[ship_count], x_current, y_current - 1);
+        if (y_current > 0) set_ship_coords(&player_ships[place_ship_count], x_current, y_current - 1);
         break;
     case KEY_DOWN:
-        if(player_ships[ship_count].is_horizontal){
-            if (y_current < 9) set_ship_coords(&player_ships[ship_count], x_current, y_current + 1);
+    	// Keep ship inside board bounds
+        if(player_ships[place_ship_count].is_horizontal){
+            if (y_current < BRD_LEN - 1) set_ship_coords(&player_ships[place_ship_count], x_current, y_current + 1);
         }
         else {
-            if (y_current < 10 - player_ships[ship_count].len) set_ship_coords(&player_ships[ship_count], x_current, y_current + 1);
+            if (y_current < BRD_LEN - player_ships[place_ship_count].len) set_ship_coords(&player_ships[place_ship_count], x_current, y_current + 1);
         }
         break;
     case KEY_RIGHT:
-        if(player_ships[ship_count].is_horizontal){
-            if (x_current < 10 - player_ships[ship_count].len) set_ship_coords(&player_ships[ship_count], x_current + 1, y_current);
+    	// Keep ship inside board bounds
+        if(player_ships[place_ship_count].is_horizontal){
+            if (x_current < BRD_LEN - player_ships[place_ship_count].len) set_ship_coords(&player_ships[place_ship_count], x_current + 1, y_current);
         }
         else {
-            if (x_current < 9) set_ship_coords(&player_ships[ship_count], x_current + 1, y_current);
+            if (x_current < BRD_LEN - 1) set_ship_coords(&player_ships[place_ship_count], x_current + 1, y_current);
         }
         break;
     case KEY_LEFT:
-        if(player_ships[ship_count].is_horizontal){
-            if (x_current > 0) set_ship_coords(&player_ships[ship_count], x_current - 1, y_current);
-        }
-        else {
-            if (x_current > 0) set_ship_coords(&player_ships[ship_count], x_current - 1, y_current);
-        }
+        if (x_current > 0) set_ship_coords(&player_ships[place_ship_count], x_current - 1, y_current);
         break;
     case KEY_B:
-    	player_ships[ship_count].is_horizontal = !(player_ships[ship_count].is_horizontal);
+    	player_ships[place_ship_count].is_horizontal = !(player_ships[place_ship_count].is_horizontal);
 
     	// Handle if ship is too close to a wall when rotating
-        if(player_ships[ship_count].is_horizontal){
-            if (x_current > 10 - player_ships[ship_count].len)
-                x_current = 10 - player_ships[ship_count].len;
+        if(player_ships[place_ship_count].is_horizontal){
+            if (x_current > BRD_LEN - player_ships[place_ship_count].len)
+                x_current = BRD_LEN - player_ships[place_ship_count].len;
         }
         else{
-            if(y_current > 10 - player_ships[ship_count].len)
-                y_current = 10 - player_ships[ship_count].len;
+            if(y_current > BRD_LEN - player_ships[place_ship_count].len)
+                y_current = BRD_LEN - player_ships[place_ship_count].len;
         }
-        set_ship_coords(&player_ships[ship_count], x_current, y_current);
+        set_ship_coords(&player_ships[place_ship_count], x_current, y_current);
         break;
+    case KEY_A:
+		if (place_ship_count < NUM_SHIPS) {
+			// Prevent ship placement on top of previously placed ships
+			if (!is_ship_overlapped(place_ship_count)) {
+				place_ship_count++;
+				player_ships[place_ship_count].is_hidden = 0; // Show the next ship.
+			}
+		}
+		break;
     }
+    // Prevent ships from being stuck hidden if place happens while ship is hidden due to blink
+    for (int i = 0; i<place_ship_count; i++) {
+    	if (player_ships[i].is_hidden) player_ships[i].is_hidden = 0;
+    }
+    irqDisable(IRQ_TIMER0);
 }
 
 
@@ -133,20 +157,6 @@ void place_ships() {
 void recv_enemy_ships(){
 
 	return;
-}
-
-bool all_ships_placed() {
-	//TODO: rewrite this
-
-    // Iterate through all ships and check if they have been placed on the board
-	for (int i = 0; i < NUM_SHIPS; i++) {
-	        if (player_ships[i].len == 0) {
-	            // at least one ship has not been placed
-	            return false;
-	        }
-	    }
-	    // all ships have been placed
-	    return true;
 }
 
 bool all_ships_received() {
@@ -216,12 +226,12 @@ void update_state(GameState* state) {
     	break;
     case STATE_HOST:
     	// Wait for other player to join
-    	
+
 		//load_backgrounds(HOST_WAIT);
     	// When player has joined, prompt to start and transition to start
     	// TODO : ADD USER INPUT HANDLING FOR STARTING GAME
     	// TODO : HANDLE WAITING FOR PLAYER
-		load_backgrounds(GAME);
+		load_backgrounds(SHIP_PLACE);
     	*state = STATE_PLACE_SHIPS;
     	break;
     case STATE_JOIN:
@@ -242,17 +252,10 @@ void update_state(GameState* state) {
     	}
     	break;
     case STATE_PLACE_SHIPS:
-
 		place_ships();
-//		if (all_ships_placed()) {
-//			//TODO: ADD send_ships();
-//			if (hosting){
-//				*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
-//			}
-//			else {
-//				*state = STATE_WAITING_FOR_TURN;
-//			}
-//		}
+		if (place_ship_count == NUM_SHIPS) {
+			*state = STATE_TAKING_TURN;
+		}
     	break;
     case STATE_WAIT_FOR_ENEMY_PLACEMENT:
     	recv_enemy_ships();
@@ -279,7 +282,7 @@ void update_state(GameState* state) {
     	 //new_shot_sprite(1, 5, 4);
 
         //if (turn_ended()) {
-            *state = STATE_CHECKING_WIN;
+            //*state = STATE_CHECKING_WIN;
         //}
         break;
     case STATE_CHECKING_WIN:

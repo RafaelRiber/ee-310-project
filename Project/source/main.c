@@ -7,6 +7,7 @@ int main(void) {
 
     //consoleDemoInit();
 	init_ships();
+	configure_timers();
     configure_graphics();
     load_backgrounds(MAIN_MENU);
 	// Initialize game FSM
@@ -17,7 +18,5 @@ int main(void) {
         swiWaitForVBlank();
         oamUpdate(&oamMain);
         oamUpdate(&oamSub);
-        
-        
     }
 }
