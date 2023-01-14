@@ -53,7 +53,7 @@ void set_ship_coords(ship * s, int x, int y) {
     int i;
     for (i = 0; i < s->len ; i ++) {
         if (s->is_horizontal) {
-            s->coords[i] = SET_X(s->coords[i], x + i);
+            s->coords[i] = SET_X(s->coords[i], (x + i));
             s->coords[i] = SET_Y(s->coords[i], y);
         } else {
             s->coords[i] = SET_X(s->coords[i], x);
@@ -90,6 +90,8 @@ void place_ships() {
 	irqEnable(IRQ_TIMER0);
     scanKeys();
     u16 keys = keysDown();
+
+    //player_ships[0].is_hidden = 0;
 
     int x_current = GET_X(player_ships[place_ship_count].coords[0]);
     int y_current = GET_Y(player_ships[place_ship_count].coords[0]);
@@ -138,6 +140,7 @@ void place_ships() {
 			// Prevent ship placement on top of previously placed ships
 			if (!is_ship_overlapped(place_ship_count)) {
 				place_ship_count++;
+				play_sound_effect(SFX_GUN);
 				player_ships[place_ship_count].is_hidden = 0; // Show the next ship.
 			}
 		}
@@ -149,6 +152,13 @@ void place_ships() {
     }
     irqDisable(IRQ_TIMER0);
 }
+
+//void place_ships_test(){
+//	for (int i=0; i<NUM_SHIPS; i++){
+//			player_ships[i].is_hidden = 0;
+//			set_ship_coords(&player_ships[i], 0, i);
+//		}
+//}
 
 
 
@@ -214,12 +224,14 @@ void update_state(GameState* state) {
 		scanKeys();
 		u16 keys = keysDown();
 		// Handle "JOIN" touchscreen and button (A KEY)
-		if (keys == KEY_A || touch.px > JOIN_BUTTON_LEFT && touch.px < JOIN_BUTTON_RIGHT && touch.py < JOIN_BUTTON_BOTTOM && touch.py > JOIN_BUTTON_TOP) {
+		if (keys == KEY_A || (touch.px > JOIN_BUTTON_LEFT && touch.px < JOIN_BUTTON_RIGHT && touch.py < JOIN_BUTTON_BOTTOM && touch.py > JOIN_BUTTON_TOP)) {
+			play_sound_effect(SFX_GUN);
 			hosting = false;
 			*state = STATE_JOIN;
 		}
 		// Handle "HOST" touchscreen button
-		else if (keys == KEY_B || touch.px > HOST_BUTTON_LEFT && touch.px < HOST_BUTTON_RIGHT && touch.py < HOST_BUTTON_BOTTOM && touch.py > HOST_BUTTON_TOP){
+		else if (keys == KEY_B || (touch.px > HOST_BUTTON_LEFT && touch.px < HOST_BUTTON_RIGHT && touch.py < HOST_BUTTON_BOTTOM && touch.py > HOST_BUTTON_TOP)){
+			play_sound_effect(SFX_GUN);
 			hosting = true;
 			*state = STATE_HOST;
 		}
@@ -254,6 +266,7 @@ void update_state(GameState* state) {
     case STATE_PLACE_SHIPS:
 		place_ships();
 		if (place_ship_count == NUM_SHIPS) {
+			play_sound_effect(SFX_LETS_DO_THIS);
 			*state = STATE_TAKING_TURN;
 		}
     	break;

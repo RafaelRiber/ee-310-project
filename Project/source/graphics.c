@@ -21,8 +21,6 @@
 #define HIT_MISS_SPRITE_IDX(i) (1 + NUM_SHIP_SPRITES + i)
 #define TARGET_SPRITE_IDX(i) (i)
 
-#define MAP_TO_INT_3_0(X) ((X > 3) ? 3 : (X < 0) ? 0 : X)
-
 #define TARGET_SPRITE_OFFSET 19
 #define MISS_SPRITE_OFFSET 18
 #define HIT_SPRITE_OFFSET 17
@@ -238,7 +236,7 @@ void clear_shots() {
 }
 //todo: merge all sprites palletes (from grit) to one sprite pallete.
 uint16_t sprite_pallete_memory_usage = 0;
-void allocate_sprite(u16 ** gfx, unsigned int * tiles, unsigned int tilesLen, char isMain ) {
+void allocate_sprite(u16 ** gfx, const unsigned int * tiles, unsigned int tilesLen, char isMain ) {
 
 	OamState * oam = &oamMain;
 
@@ -310,7 +308,7 @@ void update_ships() {
 				SpriteColorFormat_256Color,	// Color format
 				*(p_ship->sprite_buffs + j),			// Loaded graphic to display
 				is_horizontal,				// Affine rotation to use (-1 none)
-				0,			// Double size if rotating
+				false,			// Double size if rotating
 				p_ship->is_hidden,			// Hide this sprite
 				false, false,	// Horizontal or vertical flip
 				false			// Mosaic
