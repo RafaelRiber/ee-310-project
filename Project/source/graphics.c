@@ -324,3 +324,8 @@ void update_ships() {
    	
 	
 }
+
+void hide_player_ships(){
+	int i;
+	for (i = 0; i<NUM_SHIPS; i++) player_ships[i].is_hidden = 1;
+}
