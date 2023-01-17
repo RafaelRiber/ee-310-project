@@ -160,15 +160,6 @@ void place_ships() {
 //		}
 //}
 
-
-
-
-
-void recv_enemy_ships(){
-
-	return;
-}
-
 bool all_ships_received() {
     // Iterate through all ships and check if they have been received
 	for (int i = 0; i < NUM_SHIPS; i++) {
@@ -212,6 +203,16 @@ bool game_lost() {
 	}
 	// all cells of all enemy ships have been hit
 	return true;
+}
+
+void writeShipBuffer(unsigned char *buff){
+	int buff_counter = 0;
+	for (int i=0; i<NUM_SHIPS; i++){
+		for (int j = 0; j<player_ships[i].len; j++){
+			buff[buff_counter] = (char) player_ships[i].coords[j];
+			buff_counter++;
+		}
+	}
 }
 
 void update_state(GameState* state) {
@@ -261,43 +262,46 @@ void update_state(GameState* state) {
 			load_backgrounds(GAME);
 			*state = STATE_PLACE_SHIPS;
 		}
-
-    	//*state = STATE_START_GAME;
     	break;
-    case STATE_START_GAME:
-    	// if hosting, go to place ships
-    	// if guest, go to wait for enemy placement
-    	if (hosting) {
-    		*state = STATE_PLACE_SHIPS;
-    	}
-    	else {
-    		*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
-    	}
-    	break;
+//    case STATE_START_GAME:
+//    	// if hosting, go to place ships
+//    	// if guest, go to wait for enemy placement
+//    	if (hosting) {
+//    		*state = STATE_PLACE_SHIPS;
+//    	}
+//    	else {
+//    		*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
+//    	}
+//    	break;
     case STATE_PLACE_SHIPS:
 		place_ships();
 		if (place_ship_count == NUM_SHIPS) {
+			unsigned char buffer[MSG_SIZE];
+			writeShipBuffer(buffer);
+			sendMessage(SHIPS, buffer);
 			play_sound_effect(SFX_LETS_DO_THIS);
-			*state = STATE_TAKING_TURN;
+			hide_player_ships();
+			load_backgrounds(HOST_WAIT);
+			*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
 		}
     	break;
     case STATE_WAIT_FOR_ENEMY_PLACEMENT:
-    	recv_enemy_ships();
-    	if (all_ships_received()){
-    		if (hosting){
-    			*state = STATE_TAKING_TURN;
-    		}
-    		else {
-    			*state = STATE_PLACE_SHIPS;
-    		}
-    	}
+		if (recvMessage(SHIPS)) {
+			load_backgrounds(GAME);
+			for (int i = 1; i<=SHIP_MSG_BODY; i++){
+				new_shot_sprite(0, GET_X(recv_buffer[i]), GET_Y(recv_buffer[i]));
+			}
+			if (!hosting){
+
+				*state = STATE_WAITING_FOR_TURN;
+			}
+			else
+				*state = STATE_TAKING_TURN;
+		}
     	break;
 
     case STATE_WAITING_FOR_TURN:
-    	// Wait to receive enemy hits
-    	// Go to check win
-    	//if (recv_ships())
-    	*state = STATE_CHECKING_WIN;
+
     	break;
 
     case STATE_TAKING_TURN:
