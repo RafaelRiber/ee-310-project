@@ -7,6 +7,7 @@ int main(void) {
 
     //consoleDemoInit();
 	init_ships();
+	wifi_init();
 	init_audio();
 	play_music();
 	configure_timers();

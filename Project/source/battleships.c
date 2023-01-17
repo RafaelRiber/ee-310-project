@@ -234,22 +234,43 @@ void update_state(GameState* state) {
 			play_sound_effect(SFX_GUN);
 			hosting = true;
 			*state = STATE_HOST;
+			load_backgrounds(HOST_WAIT);
 		}
     	break;
     case STATE_HOST:
     	// Wait for other player to join
+    	//receiveMessage(JOIN);
+    	char msg[1];
 
-		//load_backgrounds(HOST_WAIT);
+    	if(receiveData(msg,1)>0	){
+    		if (msg[0] == 'A'){
+    			load_backgrounds(SHIP_PLACE);
+    			*state = STATE_PLACE_SHIPS;
+    			msg[0] = 'B';
+    			sendData(msg,1);
+    		}
+    	}
+
+
     	// When player has joined, prompt to start and transition to start
     	// TODO : ADD USER INPUT HANDLING FOR STARTING GAME
     	// TODO : HANDLE WAITING FOR PLAYER
-		load_backgrounds(SHIP_PLACE);
-    	*state = STATE_PLACE_SHIPS;
+//		load_backgrounds(SHIP_PLACE);
+//    	*state = STATE_PLACE_SHIPS;
     	break;
     case STATE_JOIN:
     	// TODO : Send join message and wait for start.
+    	char msg2[1];
+    	msg2[0] = 'A';
+    	sendData(msg2, 1);
 
-    	load_backgrounds(GAME);
+    	if (receiveData(msg2, 1) > 0) {
+			if (msg2[0] == 'B') {
+				load_backgrounds(GAME);
+				*state = STATE_PLACE_SHIPS;
+
+			}
+		}
 
     	//*state = STATE_START_GAME;
     	break;
