@@ -52,19 +52,18 @@ game loop ---------------------------------------------------------
 #include "WiFi_minilib.h"
 #include "stdlib.h"
 #include "battleships.h"
-typedef enum{JOIN, SHIPS, SHOT, ACK} message_type;
+typedef enum{JOIN=1, SHIPS=2, SHOT=3, ACK=4} message_type;
 
+
+#define MSG_SIZE 25
 
 #define HEADER_LEN 1
-
 #define JOIN_MSG_LEN HEADER_LEN
-#define SHIP_BODY CARRIER_SIZE + BATTLESHIP_SIZE + CRUISER_SIZE + SUBMARINE_SIZE + DESTROYER_SIZE
-#define SHIP_MSG_LEN HEADER_LEN + SHIP_BODY
-#define SHOT_MSG_LEN HEADER_LEN + 1
-#define ACK_MSG_LEN HEADER_LEN
+#define SHIP_MSG_BODY (CARRIER_SIZE + BATTLESHIP_SIZE + CRUISER_SIZE + SUBMARINE_SIZE + DESTROYER_SIZE)
+#define SHOT_MSG_BODY 1
 
-extern char send_buffer[SHIP_MSG_LEN];
-extern char recv_buffer[SHIP_MSG_LEN];
+extern char send_buffer[MSG_SIZE];
+extern char recv_buffer[MSG_SIZE];
 
 // Initializes wifi and opens socket for communication, with debug printing
 
@@ -83,7 +82,7 @@ void wifi_init();
     blocks until message is acknowledged.
 
 */
-int sendMessage(message_type type, unsigned char* body);
+void sendMessage(message_type type, unsigned char* body);
 /*
     receive message of a specified type.
     Blocks until it reads.

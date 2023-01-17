@@ -9,7 +9,7 @@
 #include "sounds.h"
 #include <stdbool.h>
 #include <string.h> /* memset */
-#include "WiFi_minilib.h"
+#include "message_protocol.h"
 
 //The 1990 Milton Bradley version
 enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};

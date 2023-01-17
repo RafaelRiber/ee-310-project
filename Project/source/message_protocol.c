@@ -1,7 +1,7 @@
 #include "message_protocol.h"
 
- char send_buffer[SHIP_MSG_LEN];
- char recv_buffer[SHIP_MSG_LEN];
+ char send_buffer[MSG_SIZE];
+ char recv_buffer[MSG_SIZE];
 
 // Initializes wifi and opens socket for communication, with debug printing
 
@@ -42,57 +42,32 @@ void wifi_init() {
     blocks until message is acknowledged.
 
 */
-int sendMessage(message_type type, unsigned char* body) {
-    int bytes;
+void sendMessage(message_type type, unsigned char* body) {
     send_buffer[0] = type;
     switch(type) {
-        case JOIN:
-            bytes = JOIN_MSG_LEN;
-        break;
+       
         case SHIPS:
-            bytes = SHIP_MSG_LEN;
-            memcpy(send_buffer+1, body, bytes-1);
+            memcpy(send_buffer+1, body, SHIP_MSG_BODY);
         break;
         case SHOT:
-            bytes = SHOT_MSG_LEN;
-            memcpy(send_buffer+1, body, bytes-1);
+            memcpy(send_buffer+1, body, SHOT_MSG_BODY);
         break;
-        case ACK:
-            bytes = ACK_MSG_LEN;
+        default:
+            //pass
         break;
     }
 
-    sendData(send_buffer, bytes);
-    if (type != ACK) {
-        while(recv_buffer[0] != ACK)
-            receiveData(recv_buffer, ACK_MSG_LEN);
-    }
-
-    return 0;
+    sendData(send_buffer, MSG_SIZE);
+    
 }
 /*
     receive message of a specified type.
     Blocks until it reads.
 */
 int recvMessage(message_type type) {
-    int bytes = 1;
-    switch(type) {
-        case JOIN:
-            bytes = JOIN_MSG_LEN;
-        break;
-        case SHIPS:
-            bytes = SHIP_MSG_LEN;
-        break;
-        case SHOT:
-            bytes = SHOT_MSG_LEN;
-        break;
-        case ACK:
-            bytes = ACK_MSG_LEN;
-        break;
-    }
-
-    while(recv_buffer[0] != type)
-        receiveData(recv_buffer, bytes);
+    
+    if (receiveData(recv_buffer, MSG_SIZE) > 0 && recv_buffer[0] == type)
+        return 1;
 
     return 0;
 }
