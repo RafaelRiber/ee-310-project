@@ -1,5 +1,6 @@
 #include "battleships.h"
 #include <nds.h>
+#include "text.h"
 #include <stdio.h>
 
 ship player_ships[NUM_SHIPS];
@@ -147,22 +148,17 @@ void place_ships() {
 		break;
     }
     // Prevent ships from being stuck hidden if place happens while ship is hidden due to blink
-    for (int i = 0; i<place_ship_count; i++) {
+    int i;
+    for (i = 0; i<place_ship_count; i++) {
     	if (player_ships[i].is_hidden) player_ships[i].is_hidden = 0;
     }
     irqDisable(IRQ_TIMER0);
 }
 
-//void place_ships_test(){
-//	for (int i=0; i<NUM_SHIPS; i++){
-//			player_ships[i].is_hidden = 0;
-//			set_ship_coords(&player_ships[i], 0, i);
-//		}
-//}
-
 bool all_ships_received() {
     // Iterate through all ships and check if they have been received
-	for (int i = 0; i < NUM_SHIPS; i++) {
+	int i;
+	for (i = 0; i < NUM_SHIPS; i++) {
 	        if (enemy_ships[i].len == 0) {
 	            // at least one ship has not been received
 	            return false;
@@ -179,8 +175,9 @@ bool game_won() {
 
 
 	// Check if all of the opponent's ships have been sunk
-	for (int i = 0; i < NUM_SHIPS; i++) {
-		for (int j = 0; j < enemy_ships[i].len; j++) {
+	int i, j;
+	for (i = 0; i < NUM_SHIPS; i++) {
+		for (j = 0; j < enemy_ships[i].len; j++) {
 			if (!GET_HIT(enemy_ships[i].hits, j)) {
 				// at least one cell of enemy ship has not been hit
 				return false;
@@ -192,9 +189,10 @@ bool game_won() {
 }
 
 bool game_lost() {
+	int i, j;
     // Check if all of the player's ships have been sunk
-	for (int i = 0; i < NUM_SHIPS; i++) {
-		for (int j = 0; j < player_ships[i].len; j++) {
+	for (i = 0; i < NUM_SHIPS; i++) {
+		for (j = 0; j < player_ships[i].len; j++) {
 			if (!GET_HIT(player_ships[i].hits, j)) {
 				// at least one cell of enemy ship has not been hit
 				return false;
@@ -207,8 +205,9 @@ bool game_lost() {
 
 void writeShipBuffer(unsigned char *buff){
 	int buff_counter = 0;
-	for (int i=0; i<NUM_SHIPS; i++){
-		for (int j = 0; j<player_ships[i].len; j++){
+	int i, j;
+	for (i=0; i<NUM_SHIPS; i++){
+		for (j = 0; j<player_ships[i].len; j++){
 			buff[buff_counter] = (char) player_ships[i].coords[j];
 			buff_counter++;
 		}
@@ -240,12 +239,17 @@ void update_state(GameState* state) {
     	break;
     case STATE_HOST:
     	// Wait for other player to join
+#ifndef DEBUG
     	if(recvMessage(JOIN) > 0) {
 			load_backgrounds(SHIP_PLACE);
 			*state = STATE_PLACE_SHIPS;
 			sendMessage(ACK,NULL);
     	}
-
+#endif
+#ifdef DEBUG
+    	load_backgrounds(SHIP_PLACE);
+    	*state = STATE_PLACE_SHIPS;
+#endif
 
     	// When player has joined, prompt to start and transition to start
     	// TODO : ADD USER INPUT HANDLING FOR STARTING GAME
@@ -255,13 +259,17 @@ void update_state(GameState* state) {
     	break;
     case STATE_JOIN:
     	// TODO : Send join message and wait for start.
-    	
+#ifndef DEBUG
 		sendMessage(JOIN, NULL);
-
     	if (recvMessage(ACK) > 0) {
 			load_backgrounds(GAME);
 			*state = STATE_PLACE_SHIPS;
 		}
+#endif
+#ifdef DEBUG
+    	load_backgrounds(GAME);
+    	*state = STATE_PLACE_SHIPS;
+#endif
     	break;
 //    case STATE_START_GAME:
 //    	// if hosting, go to place ships
@@ -278,7 +286,9 @@ void update_state(GameState* state) {
 		if (place_ship_count == NUM_SHIPS) {
 			unsigned char buffer[MSG_SIZE];
 			writeShipBuffer(buffer);
+#ifndef DEBUG
 			sendMessage(SHIPS, buffer);
+#endif
 			play_sound_effect(SFX_LETS_DO_THIS);
 			hide_player_ships();
 			load_backgrounds(HOST_WAIT);
@@ -286,11 +296,17 @@ void update_state(GameState* state) {
 		}
     	break;
     case STATE_WAIT_FOR_ENEMY_PLACEMENT:
+    	show_player_ships();
+#ifndef DEBUG
 		if (recvMessage(SHIPS)) {
 			load_backgrounds(GAME);
-			for (int i = 1; i<=SHIP_MSG_BODY; i++){
+
+			//TODO: set enemy ships to recv_buffer
+			int i;
+			for (i = 1; i<=SHIP_MSG_BODY; i++){
 				new_shot_sprite(0, GET_X(recv_buffer[i]), GET_Y(recv_buffer[i]));
 			}
+			load_backgrounds(GAME);
 			if (!hosting){
 
 				*state = STATE_WAITING_FOR_TURN;
@@ -298,6 +314,24 @@ void update_state(GameState* state) {
 			else
 				*state = STATE_TAKING_TURN;
 		}
+#endif
+#ifdef DEBUG
+
+		load_backgrounds(GAME);
+		int i,j;
+		for (i = 0; i < NUM_SHIPS; i++) {
+			enemy_ships[i] = player_ships[i];
+			for (j = 0; j < enemy_ships[i].len; j++) {
+				new_shot_sprite(0, GET_X(enemy_ships[i].coords[j]),
+						GET_Y(enemy_ships[i].coords[j]));
+			}
+		}
+
+		if (!hosting) {
+			*state = STATE_WAITING_FOR_TURN;
+		} else
+			*state = STATE_TAKING_TURN;
+#endif
     	break;
 
     case STATE_WAITING_FOR_TURN:
