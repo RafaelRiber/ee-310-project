@@ -7,12 +7,14 @@ int main(void) {
 
     //consoleDemoInit();
 	init_ships();
-	wifi_init();
 	init_audio();
 	play_music();
 	configure_timers();
     configure_graphics();
     load_backgrounds(MAIN_MENU);
+#ifndef DEBUG
+    wifi_init();
+#endif
 	// Initialize game FSM
 	GameState state = STATE_HOME; 
     while(1){
