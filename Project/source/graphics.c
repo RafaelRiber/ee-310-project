@@ -83,7 +83,7 @@ struct background sub_backgrounds[NUM_SCREENS] = {
 	battleship_title_subMapLen
 	},
 
-	[HOST_WAIT] = {
+	[WAIT] = {
 	hosting_waiting_subTiles,
 	hosting_waiting_subTilesLen,
 	hosting_waiting_subPal,
@@ -184,7 +184,7 @@ void load_backgrounds(int screen) {
 	if (screen > NUM_SCREENS || screen < 0)
 		return;
 
-	if (screen != HOST_WAIT) {
+	if (screen != WAIT) {
 		swiCopy(main_backgrounds[screen].tiles, BG_TILE_RAM(GB_BG_TILE_BASE), main_backgrounds[screen].tilesLen/2);
 		swiCopy(main_backgrounds[screen].pal, BG_PALETTE, main_backgrounds[screen].palLen/2);
 		swiCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MP_BASE), main_backgrounds[screen].mapLen/2);
