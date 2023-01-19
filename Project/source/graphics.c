@@ -131,13 +131,13 @@ void configure_graphics() {
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_SUB_BG;
 
 	//BG0 (bitmaps) configuration
-	BGCTRL_SUB[GB_BG] = BG_COLOR_256 | BG_MAP_BASE(GB_BG_MAP_BASE) | BG_TILE_BASE(GB_BG_TILE_BASE) | BG_32x32;
-	BGCTRL[GB_BG] = BG_COLOR_256 | BG_MAP_BASE(GB_BG_MAP_BASE) | BG_TILE_BASE(GB_BG_TILE_BASE) | BG_32x32;
+	BGCTRL_SUB[GB_BG] = BG_COLOR_256 | BG_MAP_BASE(GB_BG_MAP_BASE) | BG_TILE_BASE(GB_BG_TILE_BASE) | BG_32x32 | BG_PRIORITY(2);
+	BGCTRL[GB_BG] = BG_COLOR_256 | BG_MAP_BASE(GB_BG_MAP_BASE) | BG_TILE_BASE(GB_BG_TILE_BASE) | BG_32x32 | BG_PRIORITY(2);
 	
 	//bg1 (text) configuration
-	BGCTRL[TEXT_BG] = BG_COLOR_256 | BG_MAP_BASE(TEXT_MAP_BASE) | BG_TILE_BASE(TEXT_TILE_BASE) | BG_32x32;
-	BGCTRL_SUB[TEXT_BG] = BG_COLOR_256 | BG_MAP_BASE(TEXT_MAP_BASE) | BG_TILE_BASE(TEXT_TILE_BASE) | BG_32x32;
-	init_text_api(BG_MAP_RAM(TEXT_MAP_BASE), BG_TILE_RAM(TEXT_TILE_BASE), BG_MAP_RAM_SUB(GB_BG_MAP_BASE), BG_TILE_RAM_SUB(GB_BG_TILE_BASE));
+	BGCTRL[TEXT_BG] = BG_COLOR_256 | BG_MAP_BASE(TEXT_MAP_BASE) | BG_TILE_BASE(TEXT_TILE_BASE) | BG_32x32 | BG_PRIORITY(0);
+	BGCTRL_SUB[TEXT_BG] = BG_COLOR_256 | BG_MAP_BASE(TEXT_MAP_BASE) | BG_TILE_BASE(TEXT_TILE_BASE) | BG_32x32 | BG_PRIORITY(0);
+	init_text_api(BG_MAP_RAM(TEXT_MAP_BASE), BG_TILE_RAM(TEXT_TILE_BASE), BG_MAP_RAM_SUB(TEXT_MAP_BASE), BG_TILE_RAM_SUB(TEXT_TILE_BASE));
 	
 	// ###############################################################################################################################
 
@@ -192,9 +192,9 @@ void load_backgrounds(int screen) {
 		swiCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MAP_BASE), main_backgrounds[screen].mapLen/2);
 	}
 		
-	swiCopy(sub_backgrounds[screen].tiles, BG_TILE_RAM_SUB(TEXT_TILE_BASE), sub_backgrounds[screen].tilesLen/2);
+	swiCopy(sub_backgrounds[screen].tiles, BG_TILE_RAM_SUB(GB_BG_TILE_BASE), sub_backgrounds[screen].tilesLen/2);
 	swiCopy(sub_backgrounds[screen].pal, BG_PALETTE_SUB, BG0_RESERVED_PAL_SPACE/2);
-	swiCopy(sub_backgrounds[screen].map, BG_MAP_RAM_SUB(TEXT_MAP_BASE),sub_backgrounds[screen].mapLen/2);
+	swiCopy(sub_backgrounds[screen].map, BG_MAP_RAM_SUB(GB_BG_MAP_BASE),sub_backgrounds[screen].mapLen/2);
 }
 
 // put a hit or miss on the enemey board.
