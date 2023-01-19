@@ -66,22 +66,20 @@ int init_text_api(u16 * map_main, u16* tile_main, u16 *map_sub, u16* tile_sub) {
     map_ptr_sub = map_sub;
     tile_ptr_sub = tile_sub;
     
-    // append pallete to bg pallete, need to find highest index so far.
-    u16* pal_main = BG_PALETTE+254;
-    u16* pal_sub = BG_PALETTE_SUB+254;
-    // dmaCopy(textmapPal, pal_main, 4);
-    // dmaCopy(textmapPal, pal_sub, 4);
-    
-    // int i;
-    // for (i = 0; i < textmapTilesLen; i ++) {
-    //     if ((u8*)textmapTiles + i > 0) {
-    //         ((u8*)textmapTiles)[i] = (u8)254;
-    //     }
-    // }
+    ((u16*)textmapPal)[1] = ARGB16(1, 31, 0, 0);
+    dmaCopy(textmapPal+1, BG_PALETTE+255, sizeof(u16));
+    dmaCopy(textmapPal+1, BG_PALETTE_SUB+255, sizeof(u16));
+   // BG_PALETTE_SUB[255] = ; 
+    int i;
+    for (i = 0; i < textmapTilesLen; i ++) {
+        if (((u8*)textmapTiles)[i] > 0) {
+            ((u8*)textmapTiles)[i] = (u8)255;
+        }
+    }
 
     dmaCopy(textmapTiles, tile_ptr_main, textmapTilesLen);
     dmaCopy(textmapTiles, tile_ptr_sub, textmapTilesLen);
-    int i,j;
+    int j;
     for (i = 0; i < MAP_DIM; i++) {
         for (j = 0; j < MAP_DIM; j++) {
             map_main[MAP_IDX(i,j)] = (u16)BLANK;
@@ -129,6 +127,11 @@ int new_text(char * string, int x, int y, int is_main) {
 
 
 int update_text(int id, char * string, int x, int y) {
+   
+    
+    //BG_PALETTE[4] = ;
+    
+    
     if (string == NULL)
         return -INVALID_PARAM;
     if (id < 0 || id > text_count)

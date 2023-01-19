@@ -18,6 +18,7 @@
 #define GB_BG_MAP_BASE 16 // [32, 34)
 #define TEXT_MAP_BASE 17  // [34, 36)
 
+#define BG0_RESERVED_PAL_SPACE sizeof(u16)*100
 
 
 
@@ -50,68 +51,68 @@ struct background {
 	int mapLen;
 };
 
-struct background main_backgrounds[NUM_SCREENS] = {
+const struct background main_backgrounds[NUM_SCREENS] = {
 	[MAIN_MENU] = {
-	battleship_titleTiles,
-	battleship_titleTilesLen,
-	battleship_titlePal,
-	battleship_titlePalLen,
-	battleship_titleMap,
-	battleship_titleMapLen
+		battleship_titleTiles,
+		battleship_titleTilesLen,
+		battleship_titlePal,
+		battleship_titlePalLen,
+		battleship_titleMap,
+		battleship_titleMapLen
 	},
 
 	[SHIP_PLACE] = {
-	test_gameboardTiles,
-	test_gameboardTilesLen,
-	test_gameboardPal,
-	test_gameboardPalLen,
-	test_gameboardMap,
-	test_gameboardMapLen
+		test_gameboardTiles,
+		test_gameboardTilesLen,
+		test_gameboardPal,
+		test_gameboardPalLen,
+		test_gameboardMap,
+		test_gameboardMapLen
 	},
 	[GAME] = {
-	test_gameboardTiles,
-	test_gameboardTilesLen,
-	test_gameboardPal,
-	test_gameboardPalLen,
-	test_gameboardMap,
-	test_gameboardMapLen
+		test_gameboardTiles,
+		test_gameboardTilesLen,
+		test_gameboardPal,
+		test_gameboardPalLen,
+		test_gameboardMap,
+		test_gameboardMapLen
 	},
 };
 
-struct background sub_backgrounds[NUM_SCREENS] = {
+const struct background sub_backgrounds[NUM_SCREENS] = {
 	[MAIN_MENU] = {
-	battleship_title_subTiles,
-	battleship_title_subTilesLen,
-	battleship_title_subPal,
-	battleship_title_subPalLen,
-	battleship_title_subMap,
-	battleship_title_subMapLen
+		battleship_title_subTiles,
+		battleship_title_subTilesLen,
+		battleship_title_subPal,
+		battleship_title_subPalLen,
+		battleship_title_subMap,
+		battleship_title_subMapLen
 	},
 
 	[HOST_WAIT] = {
-	hosting_waiting_subTiles,
-	hosting_waiting_subTilesLen,
-	hosting_waiting_subPal,
-	hosting_waiting_subPalLen,
-	hosting_waiting_subMap,
-	hosting_waiting_subMapLen
+		hosting_waiting_subTiles,
+		hosting_waiting_subTilesLen,
+		hosting_waiting_subPal,
+		hosting_waiting_subPalLen,
+		hosting_waiting_subMap,
+		hosting_waiting_subMapLen
 	},
 
 	[SHIP_PLACE] = {
-	test_gameboardTiles,
-	test_gameboardTilesLen,
-	test_gameboardPal,
-	test_gameboardPalLen,
-	test_gameboardMap,
-	test_gameboardMapLen
+		test_gameboardTiles,
+		test_gameboardTilesLen,
+		test_gameboardPal,
+		test_gameboardPalLen,
+		test_gameboardMap,
+		test_gameboardMapLen
 	},
 	[GAME] = {
-	test_gameboardTiles,
-	test_gameboardTilesLen,
-	test_gameboardPal,
-	test_gameboardPalLen,
-	test_gameboardMap,
-	test_gameboardMapLen
+		test_gameboardTiles,
+		test_gameboardTilesLen,
+		test_gameboardPal,
+		test_gameboardPalLen,
+		test_gameboardMap,
+		test_gameboardMapLen
 	},
 };
 
@@ -136,8 +137,7 @@ void configure_graphics() {
 	//bg1 (text) configuration
 	BGCTRL[TEXT_BG] = BG_COLOR_256 | BG_MAP_BASE(TEXT_MAP_BASE) | BG_TILE_BASE(TEXT_TILE_BASE) | BG_32x32;
 	BGCTRL_SUB[TEXT_BG] = BG_COLOR_256 | BG_MAP_BASE(TEXT_MAP_BASE) | BG_TILE_BASE(TEXT_TILE_BASE) | BG_32x32;
-
-	init_text_api(BG_MAP_RAM(TEXT_MAP_BASE), BG_TILE_RAM(TEXT_TILE_BASE), BG_MAP_RAM_SUB(TEXT_MAP_BASE), BG_TILE_RAM_SUB(TEXT_TILE_BASE));
+	init_text_api(BG_MAP_RAM(TEXT_MAP_BASE), BG_TILE_RAM(TEXT_TILE_BASE), BG_MAP_RAM_SUB(GB_BG_MAP_BASE), BG_TILE_RAM_SUB(GB_BG_TILE_BASE));
 	
 	// ###############################################################################################################################
 
@@ -168,15 +168,12 @@ void configure_graphics() {
 	int i,j; 
 	for (i = 0; i < NUM_SHIPS; i++) {
 		ship * p_ship = player_ships + i;
-		//ship p_ship = player_ships[i];
 		for (j = 0; j < p_ship->len; j ++) {
-				
 			allocate_sprite( 
 				p_ship->sprite_buffs + j, 
 				spritemapTiles + 64*scount,256,0
 			);
 			scount++;
-			
 		}
 	}
 
@@ -191,13 +188,13 @@ void load_backgrounds(int screen) {
 
 	if (screen != HOST_WAIT) {
 		swiCopy(main_backgrounds[screen].tiles, BG_TILE_RAM(GB_BG_TILE_BASE), main_backgrounds[screen].tilesLen/2);
-		swiCopy(main_backgrounds[screen].pal, BG_PALETTE, main_backgrounds[screen].palLen/2);
+		swiCopy(main_backgrounds[screen].pal, BG_PALETTE, BG0_RESERVED_PAL_SPACE/2);
 		swiCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MAP_BASE), main_backgrounds[screen].mapLen/2);
 	}
 		
-	swiCopy(sub_backgrounds[screen].tiles, BG_TILE_RAM_SUB(GB_BG_TILE_BASE), sub_backgrounds[screen].tilesLen/2);
-	swiCopy(sub_backgrounds[screen].pal, BG_PALETTE_SUB, sub_backgrounds[screen].palLen/2);
-	swiCopy(sub_backgrounds[screen].map, BG_MAP_RAM_SUB(GB_BG_MAP_BASE),sub_backgrounds[screen].mapLen/2);
+	swiCopy(sub_backgrounds[screen].tiles, BG_TILE_RAM_SUB(TEXT_TILE_BASE), sub_backgrounds[screen].tilesLen/2);
+	swiCopy(sub_backgrounds[screen].pal, BG_PALETTE_SUB, BG0_RESERVED_PAL_SPACE/2);
+	swiCopy(sub_backgrounds[screen].map, BG_MAP_RAM_SUB(TEXT_MAP_BASE),sub_backgrounds[screen].mapLen/2);
 }
 
 // put a hit or miss on the enemey board.
