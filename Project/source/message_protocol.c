@@ -42,7 +42,7 @@ void wifi_init() {
     blocks until message is acknowledged.
 
 */
-void sendMessage(message_type type, unsigned char* body) {
+void sendMessage(message_type type, char* body) {
     send_buffer[0] = type;
     switch(type) {
        
@@ -70,4 +70,8 @@ int recvMessage(message_type type) {
         return 1;
 
     return 0;
+}
+
+void clearBuffer(char* buff){
+	memset(buff, 0, MSG_SIZE);
 }

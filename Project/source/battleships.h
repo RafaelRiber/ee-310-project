@@ -82,7 +82,7 @@ typedef enum {
 
 typedef enum {
     MAIN_MENU,
-    HOST_WAIT,
+	WAIT,
     SHIP_PLACE, 
     GAME
 } game_screens;
@@ -90,7 +90,7 @@ typedef enum {
 
 bool is_ship_overlapped();
 void place_ships();
-
+void place_target();
 void recv_enemy_ships();
 
 bool all_ships_received();
@@ -103,4 +103,7 @@ void update_state(GameState* state);
 
 void set_ship_coords(ship * s, int x, int y);
 void set_target_coords(int x, int y);
+void writeShipBuffer(char *buff);
+void initEnemyShips(char *buff);
+void readShots(char *buff);
 #endif

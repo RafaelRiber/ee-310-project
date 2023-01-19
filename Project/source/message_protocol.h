@@ -82,10 +82,12 @@ void wifi_init();
     blocks until message is acknowledged.
 
 */
-void sendMessage(message_type type, unsigned char* body);
+void sendMessage(message_type type, char* body);
 /*
     receive message of a specified type.
     Blocks until it reads.
 */
 int recvMessage(message_type type);
+
+void clearBuffer(char *buff);
 #endif

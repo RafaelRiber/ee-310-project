@@ -44,6 +44,7 @@ void init_ships(void) {
 
         // Initial coords of ship are (0,0)
         set_ship_coords(&player_ships[i], 0, 0);
+        set_ship_coords(&enemy_ships[i], 0, 0);
 
     }
 
@@ -155,6 +156,39 @@ void place_ships() {
     irqDisable(IRQ_TIMER0);
 }
 
+void place_target() {
+	//irqEnable(IRQ_TIMER0);
+    scanKeys();
+    u16 keys = keysDown();
+    player_target.is_hidden = 0;
+
+    int x_current = GET_X(player_target.coords);
+    int y_current = GET_Y(player_target.coords);
+
+    switch (keys) {
+    case KEY_UP:
+    	if (y_current > 0) set_target_coords(x_current, y_current-1);
+    	break;
+    case KEY_DOWN:
+    	if (y_current < BRD_LEN-1) set_target_coords(x_current, y_current+1);
+    	break;
+    case KEY_RIGHT:
+    	if (x_current < BRD_LEN-1) set_target_coords(x_current+1, y_current);
+        break;
+    case KEY_LEFT:
+    	if (x_current > 0) set_target_coords(x_current-1, y_current);
+
+        break;
+    case KEY_B:
+
+        break;
+    case KEY_A:
+
+		break;
+    }
+    //irqDisable(IRQ_TIMER0);
+}
+
 bool all_ships_received() {
     // Iterate through all ships and check if they have been received
 	int i;
@@ -203,7 +237,7 @@ bool game_lost() {
 	return true;
 }
 
-void writeShipBuffer(unsigned char *buff){
+void writeShipBuffer(char *buff){
 	int buff_counter = 0;
 	int i, j;
 	for (i=0; i<NUM_SHIPS; i++){
@@ -212,6 +246,51 @@ void writeShipBuffer(unsigned char *buff){
 			buff_counter++;
 		}
 	}
+}
+
+void initEnemyShips(char *buff) {
+	int buff_counter = 0;
+	int i, j;
+	for (i = 0; i < NUM_SHIPS; i++) {
+		for (j = 0; j < enemy_ships[i].len; j++) {
+			enemy_ships[i].coords[j] = buff[buff_counter];
+			buff_counter++;
+		}
+	}
+}
+
+void place_ships_transition(GameState *state) {
+	char buff[MSG_SIZE];
+	writeShipBuffer(buff);
+#ifndef DEBUG
+	sendMessage(SHIPS, buff);
+#endif
+	play_sound_effect(SFX_LETS_DO_THIS);
+	hide_player_ships();
+	load_backgrounds(WAIT);
+	*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
+}
+
+void wait_placement_transition(GameState *state) {
+	load_backgrounds(GAME);
+	initEnemyShips(recv_buffer + HEADER_LEN);
+	int i, j;
+	for (i = 0; i < NUM_SHIPS; i++) {
+		for (j = 0; j < enemy_ships[i].len; j++) {
+			new_shot_sprite(0, GET_X(enemy_ships[i].coords[j]), GET_Y(enemy_ships[i].coords[j]));
+		}
+	}
+	if (!hosting) {
+		load_backgrounds(WAIT); //TODO: CHANGE TO MAIN SCREEN ?
+		*state = STATE_WAITING_FOR_TURN;
+	} else {
+		*state = STATE_TAKING_TURN;
+	}
+}
+
+// Update sprites with new shot (check if hit or miss)
+void wait_turn_transition(GameState *state) {
+	*state = STATE_TAKING_TURN;
 }
 
 void update_state(GameState* state) {
@@ -228,28 +307,29 @@ void update_state(GameState* state) {
 			play_sound_effect(SFX_GUN);
 			hosting = false;
 			*state = STATE_JOIN;
+			load_backgrounds(WAIT);
 		}
 		// Handle "HOST" touchscreen button
 		else if (keys == KEY_B || (touch.px > HOST_BUTTON_LEFT && touch.px < HOST_BUTTON_RIGHT && touch.py < HOST_BUTTON_BOTTOM && touch.py > HOST_BUTTON_TOP)){
 			play_sound_effect(SFX_GUN);
 			hosting = true;
 			*state = STATE_HOST;
-			load_backgrounds(HOST_WAIT);
+			load_backgrounds(WAIT);
 		}
     	break;
     case STATE_HOST:
     	// Wait for other player to join
-#ifndef DEBUG
+		#ifndef DEBUG
     	if(recvMessage(JOIN) > 0) {
 			load_backgrounds(SHIP_PLACE);
 			*state = STATE_PLACE_SHIPS;
 			sendMessage(ACK,NULL);
     	}
-#endif
-#ifdef DEBUG
+		#endif
+		#ifdef DEBUG
     	load_backgrounds(SHIP_PLACE);
     	*state = STATE_PLACE_SHIPS;
-#endif
+		#endif
 
     	// When player has joined, prompt to start and transition to start
     	// TODO : ADD USER INPUT HANDLING FOR STARTING GAME
@@ -259,89 +339,47 @@ void update_state(GameState* state) {
     	break;
     case STATE_JOIN:
     	// TODO : Send join message and wait for start.
-#ifndef DEBUG
+		#ifndef DEBUG
 		sendMessage(JOIN, NULL);
     	if (recvMessage(ACK) > 0) {
 			load_backgrounds(GAME);
 			*state = STATE_PLACE_SHIPS;
 		}
-#endif
-#ifdef DEBUG
+		#endif
+		#ifdef DEBUG
     	load_backgrounds(GAME);
     	*state = STATE_PLACE_SHIPS;
-#endif
+		#endif
     	break;
-//    case STATE_START_GAME:
-//    	// if hosting, go to place ships
-//    	// if guest, go to wait for enemy placement
-//    	if (hosting) {
-//    		*state = STATE_PLACE_SHIPS;
-//    	}
-//    	else {
-//    		*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
-//    	}
-//    	break;
     case STATE_PLACE_SHIPS:
 		place_ships();
 		if (place_ship_count == NUM_SHIPS) {
-			unsigned char buffer[MSG_SIZE];
-			writeShipBuffer(buffer);
-#ifndef DEBUG
-			sendMessage(SHIPS, buffer);
-#endif
-			play_sound_effect(SFX_LETS_DO_THIS);
-			hide_player_ships();
-			load_backgrounds(HOST_WAIT);
-			*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
+			place_ships_transition(state);
 		}
     	break;
     case STATE_WAIT_FOR_ENEMY_PLACEMENT:
-    	show_player_ships();
-#ifndef DEBUG
+		#ifndef DEBUG
 		if (recvMessage(SHIPS)) {
-			load_backgrounds(GAME);
-
-			//TODO: set enemy ships to recv_buffer
-			int i;
-			for (i = 1; i<=SHIP_MSG_BODY; i++){
-				new_shot_sprite(0, GET_X(recv_buffer[i]), GET_Y(recv_buffer[i]));
-			}
-			load_backgrounds(GAME);
-			if (!hosting){
-
-				*state = STATE_WAITING_FOR_TURN;
-			}
-			else
-				*state = STATE_TAKING_TURN;
+			wait_placement_transition(state);
 		}
-#endif
-#ifdef DEBUG
-
+		#endif
+		#ifdef DEBUG
 		load_backgrounds(GAME);
-		int i,j;
-		for (i = 0; i < NUM_SHIPS; i++) {
-			enemy_ships[i] = player_ships[i];
-			for (j = 0; j < enemy_ships[i].len; j++) {
-				new_shot_sprite(0, GET_X(enemy_ships[i].coords[j]),
-						GET_Y(enemy_ships[i].coords[j]));
-			}
-		}
-
-		if (!hosting) {
-			*state = STATE_WAITING_FOR_TURN;
-		} else
-			*state = STATE_TAKING_TURN;
-#endif
+		writeShipBuffer(send_buffer);
+		initEnemyShips(send_buffer);
+		clearBuffer(send_buffer);
+		#endif
     	break;
 
     case STATE_WAITING_FOR_TURN:
-
+    	if (recvMessage(SHOT)){
+			wait_turn_transition(state);
+    	}
     	break;
 
     case STATE_TAKING_TURN:
         // TODO: Handle user input
-
-    	 //new_shot_sprite(1, 5, 4);
+    	place_target();
 
         //if (turn_ended()) {
             //*state = STATE_CHECKING_WIN;

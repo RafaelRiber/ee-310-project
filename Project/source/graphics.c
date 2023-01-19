@@ -89,13 +89,13 @@ const struct background sub_backgrounds[NUM_SCREENS] = {
 		battleship_title_subMapLen
 	},
 
-	[HOST_WAIT] = {
-		hosting_waiting_subTiles,
-		hosting_waiting_subTilesLen,
-		hosting_waiting_subPal,
-		hosting_waiting_subPalLen,
-		hosting_waiting_subMap,
-		hosting_waiting_subMapLen
+	[WAIT] = {
+	hosting_waiting_subTiles,
+	hosting_waiting_subTilesLen,
+	hosting_waiting_subPal,
+	hosting_waiting_subPalLen,
+	hosting_waiting_subMap,
+	hosting_waiting_subMapLen
 	},
 
 	[SHIP_PLACE] = {
@@ -186,7 +186,7 @@ void load_backgrounds(int screen) {
 	if (screen > NUM_SCREENS || screen < 0)
 		return;
 
-	if (screen != HOST_WAIT) {
+	if (screen != WAIT) {
 		swiCopy(main_backgrounds[screen].tiles, BG_TILE_RAM(GB_BG_TILE_BASE), main_backgrounds[screen].tilesLen/2);
 		swiCopy(main_backgrounds[screen].pal, BG_PALETTE, BG0_RESERVED_PAL_SPACE/2);
 		swiCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MAP_BASE), main_backgrounds[screen].mapLen/2);
