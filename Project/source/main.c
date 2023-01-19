@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "message_protocol.h"
 #include "battleships.h"
-
+#include "text.h"
 int main(void) {
 
     //consoleDemoInit();
