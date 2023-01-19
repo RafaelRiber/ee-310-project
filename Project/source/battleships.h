@@ -1,7 +1,7 @@
 #ifndef BATTLESHIPS_H
 #define BATTLESHIPS_H
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #include "stdint.h"
 #include "stdlib.h"
@@ -104,6 +104,6 @@ void update_state(GameState* state);
 void set_ship_coords(ship * s, int x, int y);
 void set_target_coords(int x, int y);
 void writeShipBuffer(char *buff);
-void readEnemyShipBuffer(char *buff);
+void initEnemyShips(char *buff);
 void readShots(char *buff);
 #endif

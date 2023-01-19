@@ -38,8 +38,8 @@ void init_ships(void) {
 		player_ships[i].is_hidden = 1;
 		player_ships[i].is_horizontal = 1;
         enemy_ships[i].hits = 0;
-        //memset(enemy_ships[i].coords, 0, CARRIER_SIZE);
-        //memset(player_ships[i].coords, 0, CARRIER_SIZE);
+        memset(enemy_ships[i].coords, 0, CARRIER_SIZE);
+        memset(player_ships[i].coords, 0, CARRIER_SIZE);
 
         // Initial coords of ship are (0,0)
         set_ship_coords(&player_ships[i], 0, 0);
@@ -172,10 +172,11 @@ void place_target() {
     	if (y_current < BRD_LEN-1) set_target_coords(x_current, y_current+1);
     	break;
     case KEY_RIGHT:
-    	if (y_current < BRD_LEN-1) set_target_coords(x_current+1, y_current);
+    	if (x_current < BRD_LEN-1) set_target_coords(x_current+1, y_current);
         break;
     case KEY_LEFT:
-    	if (y_current > 0) set_target_coords(x_current-1, y_current);
+    	if (x_current > 0) set_target_coords(x_current-1, y_current);
+
         break;
     case KEY_B:
 
@@ -184,12 +185,7 @@ void place_target() {
 
 		break;
     }
-    // Prevent ships from being stuck hidden if place happens while ship is hidden due to blink
-    int i;
-    for (i = 0; i<place_ship_count; i++) {
-    	if (player_ships[i].is_hidden) player_ships[i].is_hidden = 0;
-    }
-    irqDisable(IRQ_TIMER0);
+    //irqDisable(IRQ_TIMER0);
 }
 
 bool all_ships_received() {
@@ -251,7 +247,7 @@ void writeShipBuffer(char *buff){
 	}
 }
 
-void readEnemyShipBuffer(char *buff) {
+void initEnemyShips(char *buff) {
 	int buff_counter = 0;
 	int i, j;
 	for (i = 0; i < NUM_SHIPS; i++) {
@@ -262,8 +258,38 @@ void readEnemyShipBuffer(char *buff) {
 	}
 }
 
-void readShots(char *buff){
+void place_ships_transition(GameState *state) {
+	char buff[MSG_SIZE];
+	writeShipBuffer(buff);
+#ifndef DEBUG
+	sendMessage(SHIPS, buff);
+#endif
+	play_sound_effect(SFX_LETS_DO_THIS);
+	hide_player_ships();
+	load_backgrounds(WAIT);
+	*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
+}
 
+void wait_placement_transition(GameState *state) {
+	load_backgrounds(GAME);
+	initEnemyShips(recv_buffer + HEADER_LEN);
+	int i, j;
+	for (i = 0; i < NUM_SHIPS; i++) {
+		for (j = 0; j < enemy_ships[i].len; j++) {
+			new_shot_sprite(0, GET_X(enemy_ships[i].coords[j]), GET_Y(enemy_ships[i].coords[j]));
+		}
+	}
+	if (!hosting) {
+		load_backgrounds(WAIT); //TODO: CHANGE TO MAIN SCREEN ?
+		*state = STATE_WAITING_FOR_TURN;
+	} else {
+		*state = STATE_TAKING_TURN;
+	}
+}
+
+// Update sprites with new shot (check if hit or miss)
+void wait_turn_transition(GameState *state) {
+	*state = STATE_TAKING_TURN;
 }
 
 void update_state(GameState* state) {
@@ -327,52 +353,26 @@ void update_state(GameState* state) {
     case STATE_PLACE_SHIPS:
 		place_ships();
 		if (place_ship_count == NUM_SHIPS) {
-			writeShipBuffer(send_buffer);
-			#ifndef DEBUG
-			sendMessage(SHIPS, send_buffer);
-			#endif
-			clearBuffer(send_buffer);
-			play_sound_effect(SFX_LETS_DO_THIS);
-			hide_player_ships();
-			load_backgrounds(WAIT);
-			*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
+			place_ships_transition(state);
 		}
     	break;
     case STATE_WAIT_FOR_ENEMY_PLACEMENT:
 		#ifndef DEBUG
 		if (recvMessage(SHIPS)) {
-			load_backgrounds(GAME);
-			readEnemyShipBuffer(recv_buffer);
-			clearBuffer(recv_buffer);
+			wait_placement_transition(state);
 		}
 		#endif
 		#ifdef DEBUG
-
 		load_backgrounds(GAME);
 		writeShipBuffer(send_buffer);
-		readEnemyShipBuffer(send_buffer);
+		initEnemyShips(send_buffer);
 		clearBuffer(send_buffer);
-//		int i,j;
-//		for (i = 0; i < NUM_SHIPS; i++) {
-//			for (j = 0; j < enemy_ships[i].len; j++) {
-//				new_shot_sprite(0, GET_X(enemy_ships[i].coords[j]),
-//						GET_Y(enemy_ships[i].coords[j]));
-//			}
-//		}
 		#endif
-		show_player_ships();
-		if (!hosting) {
-			load_backgrounds(WAIT); //TODO: CHANGE TO MAIN SCREEN ?
-			*state = STATE_WAITING_FOR_TURN;
-		} else
-			*state = STATE_TAKING_TURN;
     	break;
 
     case STATE_WAITING_FOR_TURN:
     	if (recvMessage(SHOT)){
-    		*state = STATE_TAKING_TURN;
-    		readShots(recv_buffer);
-    		clearBuffer(recv_buffer);
+			wait_turn_transition(state);
     	}
     	break;
 

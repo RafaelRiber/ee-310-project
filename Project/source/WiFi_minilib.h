@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <stdio.h>
 
-#define SSID "azy1"
+#define SSID "Pixel_1221"
 
 
 //WiFi initialization
