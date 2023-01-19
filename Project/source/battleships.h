@@ -29,6 +29,8 @@ enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};
 extern const int SHIP_SIZES[NUM_SHIPS];
 extern int place_ship_count;
 
+extern uint8_t shots[BRD_LEN][BRD_LEN];
+
 
 //conserve space by having one byte for board 
 //coordinates because why not.
@@ -100,7 +102,7 @@ bool game_won();
 bool game_lost();
 
 void update_state(GameState* state);
-
+void take_shot(int x_current, int y_current, GameState *state);
 void set_ship_coords(ship * s, int x, int y);
 void set_target_coords(int x, int y);
 void writeShipBuffer(char *buff);
