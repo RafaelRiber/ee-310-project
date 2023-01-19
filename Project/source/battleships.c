@@ -1,5 +1,6 @@
 #include "battleships.h"
 #include <nds.h>
+#include "text.h"
 #include <stdio.h>
 
 ship player_ships[NUM_SHIPS];
