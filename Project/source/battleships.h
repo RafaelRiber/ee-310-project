@@ -1,7 +1,7 @@
 #ifndef BATTLESHIPS_H
 #define BATTLESHIPS_H
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #include "stdint.h"
 #include "stdlib.h"
