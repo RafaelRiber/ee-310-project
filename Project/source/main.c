@@ -13,7 +13,9 @@ int main(void) {
     configure_graphics();
     load_backgrounds(MAIN_MENU);
 #ifndef DEBUG
+	int wifi_text = new_text("loading wifi", 150, 180,1);
     wifi_init();
+	update_text(wifi_text, "", -1,-1);
 #endif
 	// Initialize game FSM
 	GameState state = STATE_HOME; 
