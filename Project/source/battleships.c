@@ -203,14 +203,14 @@ void place_target(GameState *state) {
     case KEY_LEFT:
     	if (x_current > 0) set_target_coords(x_current-1, y_current);
         break;
-    case KEY_A: // Place a shot at target location, send it, and transition to next state
-    	bool isHit;
+    case KEY_A:; // Place a shot at target location, send it, and transition to next state
+    	int isHit;
     	isHit = shot_successful(&player_target);
     	if (shots[x_current][y_current] == 0) {
     		new_shot_sprite(isHit, x_current,y_current, 1);
     		shots[x_current][y_current] = 1;
 			#ifndef DEBUG
-    		sendMessage(SHOT, &player_target.coords); //shot is a uint8
+    		sendMessage(SHOT, (char*) &player_target.coords); //shot is a uint8
 			#endif
     		player_target.is_hidden = 1;
     		//load_backgrounds(WAIT);
