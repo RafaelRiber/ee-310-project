@@ -34,7 +34,7 @@ void readScores(){
 //		}
 }
 
-void writeScores(score* myScore){
+void writeScores(){
 	FILE *file = fopen(FILENAME_TXT, "w+");
 	fclose(file);
 }

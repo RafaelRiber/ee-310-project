@@ -20,7 +20,7 @@
 #define WINS_TXT_Y 167
 
 #include <stdio.h>
-#include <fat.h>
+#include "fat.h"
 
 typedef struct {
     int shotsCount;
@@ -35,7 +35,7 @@ void initScores();
 
 void readScores();
 
-void writeScores(score* myScore);
+void writeScores();
 
 void displayScores();
 
