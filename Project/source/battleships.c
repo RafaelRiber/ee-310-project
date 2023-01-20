@@ -207,7 +207,7 @@ void place_target(GameState *state) {
     	bool isHit;
     	isHit = shot_successful(&player_target);
     	if (shots[x_current][y_current] == 0) {
-    		new_shot_sprite(isHit, x_current,y_current);
+    		new_shot_sprite(isHit, x_current,y_current, 1);
     		shots[x_current][y_current] = 1;
 			#ifndef DEBUG
     		sendMessage(SHOT, &player_target.coords); //shot is a uint8

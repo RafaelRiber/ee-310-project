@@ -33,8 +33,13 @@
 
 uint8 num_hits_misses; 
 uint8 num_ship_sprites;
+
 // gfx's for hits and misses.
-u16 * hits_misses_sprites[BRD_LEN*BRD_LEN];
+u16 * hit_sprite_main;
+u16 * hit_sprite_sub;
+u16* miss_sprite_main;
+u16* miss_sprite_sub;
+
 /*
 main engine: mode 0 
     - bg0: gameboard
@@ -153,10 +158,13 @@ void configure_graphics() {
 	oamInit(&oamMain, SpriteMapping_1D_32, false);
 	oamInit(&oamSub, SpriteMapping_1D_32, false);
 
-	//target sprite
+	//target, miss, hit allocaiton
 	allocate_sprite(&player_target.sprite_buff, spritemapTiles + TARGET_SPRITE_OFFSET*64, 256, 1);
-	
-	
+	allocate_sprite(&hit_sprite_main, spritemapTiles + 64*HIT_SPRITE_OFFSET, 256, 1);
+	allocate_sprite(&hit_sprite_sub, spritemapTiles + 64*HIT_SPRITE_OFFSET, 256, 0);
+	allocate_sprite(&miss_sprite_main, spritemapTiles + 64*MISS_SPRITE_OFFSET, 256, 1);
+	allocate_sprite(&miss_sprite_sub, spritemapTiles + 64*MISS_SPRITE_OFFSET, 256, 0);
+
 	oamRotateScale(&oamMain, 0, degreesToAngle(-90), intToFixed(1, 8), intToFixed(1, 8));
 	oamRotateScale(&oamSub, 0, degreesToAngle(-90), intToFixed(1, 8), intToFixed(1, 8));
 	
@@ -179,7 +187,6 @@ void configure_graphics() {
 
 	
 	num_hits_misses = 0;
-	memset(hits_misses_sprites, 0, sizeof(u16 *) * BRD_LEN * BRD_LEN);
 }
 
 void load_backgrounds(int screen) {
@@ -198,24 +205,30 @@ void load_backgrounds(int screen) {
 }
 
 // put a hit or miss on the enemey board.
-// (MAIN ENGINE)
-void new_shot_sprite(int isHit, int x, int y){
+// x and y are ga,eboard cordinates 0-9
+void new_shot_sprite(int isHit, int x, int y, int is_main){
+	
 	OamState * oam = &oamMain;
-	u16 * gfx = oamAllocateGfx(oam, SpriteSize_16x16, SpriteColorFormat_256Color);
+	if(!is_main)
+		oam = &oamSub;
+
+	u16 * gfx; 
 	num_hits_misses += 1;
-	hits_misses_sprites[num_hits_misses] = gfx;
-	if (isHit) {
-		dmaCopy(spritemapTiles+64*HIT_SPRITE_OFFSET, gfx,256);
-		
-	}
-	else {
-		dmaCopy(spritemapTiles+64*MISS_SPRITE_OFFSET, gfx,256);
-	}
+	
+	if (isHit && is_main) 
+		gfx = hit_sprite_main;
+	else if(isHit && !is_main)
+		gfx = hit_sprite_sub;
+	else if(!isHit && is_main)
+		gfx = miss_sprite_main;
+	else
+		gfx = miss_sprite_sub;
+	
 
 	int sx = (x * 16) + 48;
 	int sy = (y * 16) + 16;
 
-	oamSet(&oamMain, 	// oam handler
+	oamSet(oam, 	// oam handler
 		HIT_MISS_SPRITE_IDX(num_hits_misses),				// Number of sprite
 		sx, sy,			// Coordinates
 		0,				// Priority
@@ -234,7 +247,9 @@ void new_shot_sprite(int isHit, int x, int y){
 }
 
 void clear_shots() {
-	oamClear (&oamMain, num_ship_sprites, num_ship_sprites + num_hits_misses);
+	
+	oamClear (&oamMain, HIT_MISS_SPRITE_IDX(0), HIT_MISS_SPRITE_IDX(num_hits_misses));
+	oamClear (&oamSub, HIT_MISS_SPRITE_IDX(0), HIT_MISS_SPRITE_IDX(num_hits_misses));
 }
 //todo: merge all sprites palletes (from grit) to one sprite pallete.
 uint16_t sprite_pallete_memory_usage = 0;
@@ -304,7 +319,7 @@ void update_ships() {
 			oamSet(&oamSub, 	// oam handler
 				SHIP_SPRITE_IDX(i,j),				// Number of sprite
 				x, y,			// Coordinates
-				0,				// Priority
+				1,				// Priority
 				0,				// Palette to use
 				SpriteSize_16x16,			// Sprite size
 				SpriteColorFormat_256Color,	// Color format
