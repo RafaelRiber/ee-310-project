@@ -7,6 +7,7 @@
 
 
 #include "storage.h"
+#include "text.h"
 
 
 static const char *FILENAME_TXT = "/battleshipScores.txt";
@@ -16,9 +17,9 @@ void initScores(){
 	myScore.shotsCount = 0;
 	myScore.hitsCount = 0;
 	myScore.winsCount = 0;
-	myScore.shots_txt_id = new_text("A", SHOTS_TXT_X, SHOTS_TXT_Y);
-	myScore.hits_txt_id = new_text("A", HITS_TXT_X, HITS_TXT_Y);
-	myScore.wins_txt_id = new_text("A", WINS_TXT_X, WINS_TXT_Y);
+	myScore.shots_txt_id = new_text("A", SHOTS_TXT_X, SHOTS_TXT_Y, 1);
+	myScore.hits_txt_id = new_text("A", HITS_TXT_X, HITS_TXT_Y, 1);
+	myScore.wins_txt_id = new_text("A", WINS_TXT_X, WINS_TXT_Y, 1);
 }
 
 void readScores(){

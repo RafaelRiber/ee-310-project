@@ -31,6 +31,8 @@ typedef struct {
     uint8_t wins_txt_id;
 } score;
 
+void initScores();
+
 void readScores();
 
 void writeScores(score* myScore);

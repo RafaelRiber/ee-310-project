@@ -26,7 +26,7 @@ u16 * tile_ptr_sub;
 #define DIGIT_OFF 26
 #define BLANK 37
 #define MAP_DIM 32
-#define MAP_IDX(x,y) (x*MAP_DIM + y)
+#define MAP_IDX(y,x) (y*MAP_DIM + x)
 /*  
     simply displays nothing for special characters.
     note: x and y are screen coordinates, they will be rounded to a multiple of 8.
@@ -44,7 +44,7 @@ void insert_str(u16 * map, char * string, int len, int x, int y) {
         else
             c = (char) BLANK;
         
-        map[MAP_IDX(x,y+i)] = (u16)c;
+        map[MAP_IDX(y,x+i)] = (u16)c;
     }   
 
 }
@@ -54,7 +54,7 @@ void clear_map_portion(u16* map, int x, int y, int len) {
     y/= 8;
     int i;
     for (i = 0; i < len; i ++) {
-        map[MAP_IDX(x,y+i)] = (u16)BLANK;
+        map[MAP_IDX(y,x+i)] = (u16)BLANK;
     }
 }
 
@@ -66,7 +66,7 @@ int init_text_api(u16 * map_main, u16* tile_main, u16 *map_sub, u16* tile_sub) {
     map_ptr_sub = map_sub;
     tile_ptr_sub = tile_sub;
     
-    ((u16*)textmapPal)[1] = ARGB16(1, 31, 0, 0);
+    ((u16*)textmapPal)[1] = ARGB16(1, 31, 31, 31);
     dmaCopy(textmapPal+1, BG_PALETTE+255, sizeof(u16));
     dmaCopy(textmapPal+1, BG_PALETTE_SUB+255, sizeof(u16));
    // BG_PALETTE_SUB[255] = ; 
