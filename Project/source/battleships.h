@@ -1,7 +1,7 @@
 #ifndef BATTLESHIPS_H
 #define BATTLESHIPS_H
 
-#define DEBUG 1
+//#define DEBUG 1
 
 #include "stdint.h"
 #include "stdlib.h"
@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <string.h> /* memset */
 #include "message_protocol.h"
+#include "storage.h"
 
 //The 1990 Milton Bradley version
 enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};

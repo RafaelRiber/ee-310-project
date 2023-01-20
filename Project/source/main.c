@@ -3,6 +3,7 @@
 #include "message_protocol.h"
 #include "battleships.h"
 #include "text.h"
+
 int main(void) {
 
     //consoleDemoInit();
@@ -14,6 +15,10 @@ int main(void) {
     load_backgrounds(MAIN_MENU);
 #ifndef DEBUG
     wifi_init();
+    initScores();
+    //fatInit(1, true);
+    //readScores();
+    displayScores();
 #endif
 	// Initialize game FSM
 	GameState state = STATE_HOME; 
