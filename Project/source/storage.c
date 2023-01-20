@@ -35,7 +35,8 @@ void readScores(){
 }
 
 void writeScores(score* myScore){
-
+	FILE *file = fopen(FILENAME_TXT, "w+");
+	fclose(file);
 }
 
 void displayScores(){

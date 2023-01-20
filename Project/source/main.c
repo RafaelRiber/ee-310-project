@@ -18,7 +18,7 @@ int main(void) {
     wifi_init();
     initScores();
     fatInitDefault();
-    //readScores();
+	writeScores(NULL);
     displayScores();
 	update_text(wifi_text, "", -1,-1);
 #endif
