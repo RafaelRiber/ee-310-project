@@ -3,6 +3,7 @@
 #include "message_protocol.h"
 #include "battleships.h"
 #include "text.h"
+
 int main(void) {
 
     //consoleDemoInit();
@@ -15,6 +16,10 @@ int main(void) {
 #ifndef DEBUG
 	int wifi_text = new_text("loading wifi", 150, 180,1);
     wifi_init();
+    initScores();
+    fatInitDefault();
+	writeScores(NULL);
+    displayScores();
 	update_text(wifi_text, "", -1,-1);
 #endif
 	// Initialize game FSM

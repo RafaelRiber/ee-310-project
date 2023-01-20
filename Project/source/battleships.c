@@ -213,8 +213,6 @@ void place_target(GameState *state) {
     		sendMessage(SHOT, (char*) &player_target.coords); //shot is a uint8
 			#endif
     		player_target.is_hidden = 1;
-    		//load_backgrounds(WAIT);
-    		//hide_player_ships();
     		*state = STATE_CHECKING_WIN;
     	}
     	else {
@@ -353,6 +351,8 @@ void check_win_transition(GameState *state) {
 		new_text("YOU LOSE", 100, 100, 0);
 		*state = STATE_LOSE;
 	} else {
+		load_backgrounds(WAIT);
+		hide_player_ships();
 		*state = STATE_WAITING_FOR_TURN;
 	}
 }
