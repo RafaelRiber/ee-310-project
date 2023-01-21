@@ -43,7 +43,8 @@ void wifi_init() {
 
 */
 void sendMessage(message_type type, char* body) {
-    send_buffer[0] = type;
+	memset(send_buffer, 0, MSG_SIZE);
+	send_buffer[0] = type;
     switch(type) {
        
         case SHIPS:

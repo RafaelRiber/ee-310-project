@@ -1,8 +1,6 @@
 #ifndef BATTLESHIPS_H
 #define BATTLESHIPS_H
 
-//#define DEBUG 1
-
 #include "stdint.h"
 #include "stdlib.h"
 #include "nds.h"
@@ -40,6 +38,7 @@ extern const int SHIP_SIZES[NUM_SHIPS];
 extern int place_ship_count;
 
 extern uint8_t shots[BRD_LEN][BRD_LEN];
+extern uint8_t enemy_shots[BRD_LEN][BRD_LEN];
 
 
 //conserve space by having one byte for board 
@@ -89,7 +88,6 @@ typedef enum {
 	STATE_WAIT_FOR_ENEMY_PLACEMENT,
     STATE_WAITING_FOR_TURN,
     STATE_TAKING_TURN,
-    STATE_CHECKING_WIN,
     STATE_GAMEOVER
 } GameState;
 
@@ -111,7 +109,7 @@ bool all_ships_received();
 bool game_won();
 
 bool game_lost();
-
+void check_win_transition(GameState *state, GameState stateIfNotOver);
 void update_state(GameState* state);
 void take_shot(int x_current, int y_current, GameState *state);
 void set_ship_coords(ship * s, int x, int y);

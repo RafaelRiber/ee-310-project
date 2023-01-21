@@ -7,13 +7,12 @@
 int main(void) {
 
     //consoleDemoInit();
+	configure_interrupts();
 	init_game();
 	init_audio();
 	play_music();
-	configure_interrupts();
     configure_graphics();
     load_backgrounds(MAIN_MENU);
-#ifndef DEBUG
 	int wifi_text = new_text("loading wifi", 150, 180,1);
     wifi_init();
     initScores();
@@ -21,7 +20,6 @@ int main(void) {
 	writeScores(NULL);
     displayScores();
 	update_text(wifi_text, "", -1,-1);
-#endif
 	// Initialize game FSM
 	GameState state = STATE_HOME; 
     while(1){

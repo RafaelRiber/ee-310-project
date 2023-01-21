@@ -21,6 +21,7 @@ bool hosting = false;
 int place_ship_count = 0;
 
 uint8_t shots[BRD_LEN][BRD_LEN];
+uint8_t enemy_shots[BRD_LEN][BRD_LEN];
 int ships_received = 0;
 
 void wait_placement_transition(GameState *state);
@@ -57,16 +58,11 @@ void init_game(void) {
     for (i = 0; i < BRD_LEN; i++){
     	for (j = 0; j < BRD_LEN; j++){
     		shots[i][j] = 0;
+    		enemy_shots[i][j] = 0;
     	}
     }
 
 	player_target.is_hidden = 1;
-
-	// Init. text
-	text_ids[TXT_WAIT] = new_text("WAITING FOR ENEMY", 48,0,0);
-	text_ids[TXT_GAME_OVER] = new_text("GAME OVER", 100,100,0);
-	text_ids[TXT_STATUS] = new_text("STATUSSSS", 48,0,1);
-
 	return;
 }
 void set_ship_coords(ship * s, int x, int y) {
@@ -254,16 +250,15 @@ void place_target(GameState *state) {
     	if (shots[x_current][y_current] == 0) {
     		new_shot_sprite(isHit, x_current,y_current, 1);
     		shots[x_current][y_current] = 1;
-			#ifndef DEBUG
     		sendMessage(SHOT, (char*) &player_target.coords); //shot is a uint8
-			#endif
     		player_target.is_hidden = 1;
-    		*state = STATE_CHECKING_WIN;
+    		irqEnable(IRQ_KEYS); // ENABLE KEY INTERRUPT
+    		check_win_transition(state, STATE_WAITING_FOR_TURN);
+    		update_text(text_ids[TXT_WAIT], "Enemys Turn", -1, -1);
     	}
     	else {
     		play_sound_effect(SFX_ERROR);
     	}
-
 		break;
     }
     //irqDisable(IRQ_TIMER0);
@@ -326,11 +321,16 @@ void initEnemyShips(char *buff) {
 	}
 }
 
-void updateShipHits(char coord) {
+// Returns -1 on illegal shot received (most likely double receive due to wifi error)
+int updateShipHits(char coord) {
 	int x,y,i,j;
 	int isHit = 0;
 	x = GET_X(coord);
 	y = GET_Y(coord);
+
+	if (enemy_shots[x][y] == 1) return -1;
+	enemy_shots[x][y] = 1;
+
 	for (i = 0; i < NUM_SHIPS; i++) {
 		for (j = 0; j < player_ships[i].len; j++) {
 			if (x == GET_X(player_ships[i].coords[j])
@@ -341,22 +341,17 @@ void updateShipHits(char coord) {
 		}
 	}
 	new_shot_sprite(isHit, x, y, 0);
-
+	return 0;
 }
 
 void place_ships_transition(GameState *state, int ships_received) {
 	char buff[MSG_SIZE];
 	writeShipBuffer(buff);
-#ifndef DEBUG
 	sendMessage(SHIPS, buff);
-#endif
-#ifdef DEBUG
-	int i;
-	for (i = 0; i < NUM_SHIPS; i++) enemy_ships[i] = player_ships[i];
-#endif
 	play_sound_effect(SFX_LETS_DO_THIS);
 	if (!ships_received) {
 		load_backgrounds(WAIT);
+		hide_player_ships();
 		*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
 	} else {
 		wait_placement_transition(state);
@@ -364,25 +359,10 @@ void place_ships_transition(GameState *state, int ships_received) {
 }
 
 void wait_placement_transition(GameState *state) {
+	show_player_ships();
 	load_backgrounds(GAME);
-#ifndef DEBUG
 	initEnemyShips(recv_buffer + HEADER_LEN);
-#endif
-#ifdef DEBUG
-	int i;
-	for (i = 0; i < NUM_SHIPS; i++) {
-		enemy_ships[i] = player_ships[i];
-	}
-	//-------------------------------------------------------------------------------------------------------------------
-	// Show enemy ships as shots for debug
-//  int j;
-//	for (i = 0; i < NUM_SHIPS; i++) {
-//		for (j = 0; j < enemy_ships[i].len; j++) {
-//			new_shot_sprite(0, GET_X(enemy_ships[i].coords[j]), GET_Y(enemy_ships[i].coords[j]));
-//		}
-//	}
-	//-------------------------------------------------------------------------------------------------------------------
-#endif
+
 	if (!hosting) {
 		*state = STATE_WAITING_FOR_TURN;
 	} else {
@@ -392,32 +372,28 @@ void wait_placement_transition(GameState *state) {
 
 // Update sprites with new shot (check if hit or miss)
 void wait_turn_transition(GameState *state) {
-
-	#ifndef DEBUG
-	updateShipHits(recv_buffer[HEADER_LEN]);
-	#endif
-
 	load_backgrounds(GAME);
 	show_player_ships();
-	*state = STATE_TAKING_TURN;
+	check_win_transition(state, STATE_TAKING_TURN);
+	update_text(text_ids[TXT_WAIT], "Your Turn", -1, -1);
 
 }
 
-void check_win_transition(GameState *state) {
+void check_win_transition(GameState *state, GameState stateIfNotOver) {
 	// Check if the game has been won or lost
 	if (game_won()) {
-		new_text("YOU WIN", 100, 100, 0);
+		update_text(text_ids[TXT_WAIT], "YOU WIN", -1, -1);
 		*state = STATE_GAMEOVER;
 		start_timer();
 		
 	} else if (game_lost()) {
-		new_text("YOU LOSE", 100, 100, 0);
+		update_text(text_ids[TXT_WAIT], "YOU LOSE", -1, -1);
 		*state = STATE_GAMEOVER;
 		start_timer();
 	} else {
 		//load_backgrounds(WAIT);
 		//hide_player_ships();
-		*state = STATE_WAITING_FOR_TURN;
+		*state = stateIfNotOver;
 	}
 }
 
@@ -447,32 +423,19 @@ void update_state(GameState* state) {
     	break;
     case STATE_HOST:
     	// Wait for other player to join
-		#ifndef DEBUG
     	if(recvMessage(JOIN) > 0) {
 			load_backgrounds(SHIP_PLACE);
 			*state = STATE_PLACE_SHIPS;
 			sendMessage(ACK,NULL);
     	}
-		#endif
-		#ifdef DEBUG
-    	load_backgrounds(SHIP_PLACE);
-    	*state = STATE_PLACE_SHIPS;
-		#endif
 
     	break;
     case STATE_JOIN:
-    	// TODO : Send join message and wait for start.
-		#ifndef DEBUG
 		sendMessage(JOIN, NULL);
     	if (recvMessage(ACK) > 0) {
 			load_backgrounds(GAME);
 			*state = STATE_PLACE_SHIPS;
 		}
-		#endif
-		#ifdef DEBUG
-    	load_backgrounds(GAME);
-    	*state = STATE_PLACE_SHIPS;
-		#endif
     	break;
     case STATE_PLACE_SHIPS:
 		if (recvMessage(SHIPS)) {
@@ -484,36 +447,23 @@ void update_state(GameState* state) {
 		}
     	break;
     case STATE_WAIT_FOR_ENEMY_PLACEMENT:
-		#ifndef DEBUG
 		if (!ships_received && recvMessage(SHIPS)) {
 			wait_placement_transition(state);
 		}
-		#endif
-		#ifdef DEBUG
-		load_backgrounds(GAME);
-		wait_placement_transition(state);
-		#endif
     	break;
 
     case STATE_WAITING_FOR_TURN:
-		#ifndef DEBUG
     	if (recvMessage(SHOT)){
-			wait_turn_transition(state);
+    		irqDisable(IRQ_KEYS); // DISABLE KEY INTERRUPT
+    		if (updateShipHits(recv_buffer[HEADER_LEN]) == 0){
+    			wait_turn_transition(state);
+    		}
     	}
-		#endif
-
-		#ifdef DEBUG
-    	wait_turn_transition(state);
-		#endif
     	break;
 
     case STATE_TAKING_TURN:
     	place_target(state);
         break;
-    case STATE_CHECKING_WIN:
-		// Check if the game has been won or lost
-		check_win_transition(state);
-		break;
     case STATE_GAMEOVER:
 		// TODO: Display "you win" message
 		// TODO: Increment wins and shots/hits stats in file
