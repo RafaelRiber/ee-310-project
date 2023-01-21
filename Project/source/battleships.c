@@ -472,6 +472,7 @@ void update_state(GameState* state) {
 			*state = STATE_HOME;
 			hide_player_ships();
 			clear_shots();
+			init_game();
 			load_backgrounds(MAIN_MENU);
 			player_target.is_hidden = 1;
 		}
