@@ -33,6 +33,9 @@ extern int text_ids[NUM_TXT_IDS];
 #define SUBMARINE_SIZE 3
 #define DESTROYER_SIZE 2
 
+
+#define GAME_OVER_SCREEN_TIME 5
+
 extern const int SHIP_SIZES[NUM_SHIPS];
 extern int place_ship_count;
 
@@ -87,8 +90,7 @@ typedef enum {
     STATE_WAITING_FOR_TURN,
     STATE_TAKING_TURN,
     STATE_CHECKING_WIN,
-    STATE_WIN,
-    STATE_LOSE
+    STATE_GAMEOVER
 } GameState;
 
 typedef enum {

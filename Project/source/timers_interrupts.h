@@ -9,11 +9,13 @@
 #define TIMERS_INTERRUPTS_H_
 #include "battleships.h"
 
-#define BLINK_FREQ 4
+#define BLINK_FREQ 5
 
-void blink_interrupt();
+void blink_ISR();
+void second_ISR();
 
-void configure_timers();
-
+void configure_interrupts();
+void start_timer();
+int is_seconds(int s);
 
 #endif /* TIMERS_INTERRUPTS_H_ */
