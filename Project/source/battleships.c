@@ -400,12 +400,12 @@ void check_win_transition(GameState *state, GameState stateIfNotOver) {
 void update_state(GameState* state) {
 	touchPosition touch;
 	touchRead(&touch);
+	scanKeys();
+	u16 keys = keysDown();
 
 	switch (*state) {
 
 	case STATE_HOME:
-		scanKeys();
-		u16 keys = keysDown();
 		// Handle "JOIN" touchscreen and button (A KEY)
 		if (keys == KEY_A || (touch.px > JOIN_BUTTON_LEFT && touch.px < JOIN_BUTTON_RIGHT && touch.py < JOIN_BUTTON_BOTTOM && touch.py > JOIN_BUTTON_TOP)) {
 			play_sound_effect(SFX_GUN);
@@ -422,6 +422,11 @@ void update_state(GameState* state) {
 		}
     	break;
     case STATE_HOST:
+    	//Back Button
+    	if (keys == KEY_B){
+    		load_backgrounds(MAIN_MENU);
+    		*state = STATE_HOME;
+    	}
     	// Wait for other player to join
     	if(recvMessage(JOIN) > 0) {
 			load_backgrounds(SHIP_PLACE);
@@ -431,6 +436,11 @@ void update_state(GameState* state) {
 
     	break;
     case STATE_JOIN:
+		//Back Button
+		if (keys == KEY_B) {
+			load_backgrounds(MAIN_MENU);
+			*state = STATE_HOME;
+		}
 		sendMessage(JOIN, NULL);
     	if (recvMessage(ACK) > 0) {
 			load_backgrounds(GAME);
