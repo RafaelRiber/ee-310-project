@@ -10,6 +10,8 @@ void init_audio()
 	mmLoadEffect(SFX_GUN);
 	mmLoadEffect(SFX_ERROR);
 	mmLoadEffect(SFX_LETS_DO_THIS);
+	mmLoadEffect(SFX_SPLASH);
+	mmLoadEffect(SFX_EXPLOSION);
 }
 
 void play_music(){
@@ -34,6 +36,12 @@ void play_sound_effect(int i) {
 	if (i == SFX_ERROR){
 		sound.rate = 1024;
 	}
+	if (i == SFX_SPLASH){
+			sound.rate = 1024;
+		}
+	if (i == SFX_EXPLOSION){
+			sound.rate = 1024;
+		}
 
 	//Play the effect using the sound structure
 	mmEffectEx(&sound);
