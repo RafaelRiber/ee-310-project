@@ -24,6 +24,27 @@ uint8_t shots[BRD_LEN][BRD_LEN];
 uint8_t enemy_shots[BRD_LEN][BRD_LEN];
 int ships_received = 0;
 
+int count_shots() {
+    int count = 0;
+    for (int i = 0; i < BRD_LEN; i++) {
+        for (int j = 0; j < BRD_LEN; j++) {
+            if (shots[i][j] == 1) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+
+int count_hits() {
+	int count = 0;
+	for (int i = 0; i < NUM_SHIPS; i++) {
+		count = count + enemy_ships[i].hits;
+	}
+	return count;
+}
+
 void wait_placement_transition(GameState *state);
 void init_game(void) {
     player_ships[CARRIER].len = CARRIER_SIZE;
@@ -381,12 +402,15 @@ void wait_turn_transition(GameState *state) {
 
 void check_win_transition(GameState *state, GameState stateIfNotOver) {
 	// Check if the game has been won or lost
+
 	if (game_won()) {
+		increment_scores(1, count_shots(), count_hits());
 		update_text(text_ids[TXT_WAIT], "YOU WIN", -1, -1);
 		*state = STATE_GAMEOVER;
 		start_timer();
 		
 	} else if (game_lost()) {
+		increment_scores(1, count_shots(), count_hits());
 		update_text(text_ids[TXT_WAIT], "YOU LOSE", -1, -1);
 		*state = STATE_GAMEOVER;
 		start_timer();
@@ -425,6 +449,7 @@ void update_state(GameState* state) {
     	// Wait for other player to join
     	if(recvMessage(JOIN) > 0) {
 			load_backgrounds(SHIP_PLACE);
+			hide_scores();
 			*state = STATE_PLACE_SHIPS;
 			sendMessage(ACK,NULL);
     	}
@@ -434,6 +459,7 @@ void update_state(GameState* state) {
 		sendMessage(JOIN, NULL);
     	if (recvMessage(ACK) > 0) {
 			load_backgrounds(GAME);
+			hide_scores();
 			*state = STATE_PLACE_SHIPS;
 		}
     	break;
@@ -470,6 +496,8 @@ void update_state(GameState* state) {
 		// TODO: Prompt forrestart
 		if (is_seconds(GAME_OVER_SCREEN_TIME)) {
 			*state = STATE_HOME;
+			display_scores();
+			write_scores();
 			hide_player_ships();
 			clear_shots();
 			load_backgrounds(MAIN_MENU);

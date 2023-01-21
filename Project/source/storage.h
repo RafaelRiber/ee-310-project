@@ -31,15 +31,17 @@ typedef struct {
     uint8_t wins_txt_id;
 } score;
 
-void initScores();
+void init_scores();
 
-void readScores();
+void read_scores();
 
-void writeScores();
+void write_scores();
 
-void displayScores();
+void display_scores();
 
-void hideScore();
+void hide_scores();
+
+void increment_scores(int wonGame, int shotsMade, int hitsMade);
 
 
 #endif /* STORAGE_H_ */
