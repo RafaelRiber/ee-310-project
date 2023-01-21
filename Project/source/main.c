@@ -10,7 +10,7 @@ int main(void) {
 	init_ships();
 	init_audio();
 	play_music();
-	configure_timers();
+	configure_interrupts();
     configure_graphics();
     load_backgrounds(MAIN_MENU);
 #ifndef DEBUG

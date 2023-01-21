@@ -95,6 +95,39 @@ bool is_ship_overlapped(int ship_index) {
     return false;
 }
 
+void set_to_free_coordinates(int id) {
+	if (id == 0)
+		return;
+	int x = 0;
+	int y = 0;
+	int i = 0;
+
+	for (x = 0; x < BRD_LEN ; x ++) {
+		for (y = 0; y < BRD_LEN; y ++) {
+			int can_place = 1;
+		
+			for ( i = 0; i < id; i ++) {
+				
+				int olen = player_ships[i].len;
+				int k;
+				for (k = 0; k < olen; k ++ ) {
+					int ox = GET_X(player_ships[i].coords[k]);	
+					int oy = GET_Y(player_ships[i].coords[k]);
+					if (ox >= x && (ox <= x + player_ships[id].len) && oy == y) {
+						can_place = 0;
+					}
+						
+				}
+			}
+			if (can_place) {
+				set_ship_coords(player_ships + id, x, y);
+				return;
+			}
+				
+		}
+	}
+	
+}
 
 void place_ships() {
 	irqEnable(IRQ_TIMER0);
@@ -150,6 +183,7 @@ void place_ships() {
 			// Prevent ship placement on top of previously placed ships
 			if (!is_ship_overlapped(place_ship_count)) {
 				place_ship_count++;
+				set_to_free_coordinates(place_ship_count);
 				play_sound_effect(SFX_GUN);
 				player_ships[place_ship_count].is_hidden = 0; // Show the next ship.
 			}
@@ -346,10 +380,13 @@ void check_win_transition(GameState *state) {
 	// Check if the game has been won or lost
 	if (game_won()) {
 		new_text("YOU WIN", 100, 100, 0);
-		*state = STATE_WIN;
+		*state = STATE_GAMEOVER;
+		start_timer();
+		
 	} else if (game_lost()) {
 		new_text("YOU LOSE", 100, 100, 0);
-		*state = STATE_LOSE;
+		*state = STATE_GAMEOVER;
+		start_timer();
 	} else {
 		load_backgrounds(WAIT);
 		hide_player_ships();
@@ -447,14 +484,19 @@ void update_state(GameState* state) {
 		// Check if the game has been won or lost
 		check_win_transition(state);
 		break;
-    case STATE_WIN:
+    case STATE_GAMEOVER:
 		// TODO: Display "you win" message
 		// TODO: Increment wins and shots/hits stats in file
-		// TODO: Prompt for restart
+		// TODO: Prompt forrestart
+		if (is_seconds(GAME_OVER_SCREEN_TIME)) {
+			*state = STATE_HOME;
+			hide_player_ships();
+			clear_shots();
+			load_backgrounds(MAIN_MENU);
+			player_target.is_hidden = 1;
+		}
+			
 		break;
-	case STATE_LOSE:
-		// TODO: Display "you lose" message
-		// TODO: Prompt for restart
-		break;
+	
 	}
 }

@@ -65,6 +65,14 @@ const struct background main_backgrounds[NUM_SCREENS] = {
 		battleship_titleMap,
 		battleship_titleMapLen
 	},
+	[WAIT] = {
+	hosting_waiting_subTiles,
+	hosting_waiting_subTilesLen,
+	hosting_waiting_subPal,
+	hosting_waiting_subPalLen,
+	hosting_waiting_subMap,
+	hosting_waiting_subMapLen
+	},
 
 	[SHIP_PLACE] = {
 		test_gameboardTiles,
@@ -193,15 +201,17 @@ void load_backgrounds(int screen) {
 	if (screen > NUM_SCREENS || screen < 0)
 		return;
 
-	if (screen != WAIT) {
-		swiCopy(main_backgrounds[screen].tiles, BG_TILE_RAM(GB_BG_TILE_BASE), main_backgrounds[screen].tilesLen/2);
-		swiCopy(main_backgrounds[screen].pal, BG_PALETTE, BG0_RESERVED_PAL_SPACE/2);
-		swiCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MAP_BASE), main_backgrounds[screen].mapLen/2);
-	}
-		
-	swiCopy(sub_backgrounds[screen].tiles, BG_TILE_RAM_SUB(GB_BG_TILE_BASE), sub_backgrounds[screen].tilesLen/2);
-	swiCopy(sub_backgrounds[screen].pal, BG_PALETTE_SUB, BG0_RESERVED_PAL_SPACE/2);
-	swiCopy(sub_backgrounds[screen].map, BG_MAP_RAM_SUB(GB_BG_MAP_BASE),sub_backgrounds[screen].mapLen/2);
+
+	swiCopy(main_backgrounds[screen].tiles, BG_TILE_RAM(GB_BG_TILE_BASE), main_backgrounds[screen].tilesLen/2);
+	swiCopy(main_backgrounds[screen].pal, BG_PALETTE, BG0_RESERVED_PAL_SPACE/2);
+	swiCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MAP_BASE), main_backgrounds[screen].mapLen/2);
+	
+	if ( screen != WAIT) {
+		swiCopy(sub_backgrounds[screen].tiles, BG_TILE_RAM_SUB(GB_BG_TILE_BASE), sub_backgrounds[screen].tilesLen/2);
+		swiCopy(sub_backgrounds[screen].pal, BG_PALETTE_SUB, BG0_RESERVED_PAL_SPACE/2);
+		swiCopy(sub_backgrounds[screen].map, BG_MAP_RAM_SUB(GB_BG_MAP_BASE),sub_backgrounds[screen].mapLen/2);
+	}	
+	
 }
 
 // put a hit or miss on the enemey board.
