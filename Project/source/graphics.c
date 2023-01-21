@@ -202,15 +202,16 @@ void load_backgrounds(int screen) {
 		return;
 
 
-	swiCopy(main_backgrounds[screen].tiles, BG_TILE_RAM(GB_BG_TILE_BASE), main_backgrounds[screen].tilesLen/2);
-	swiCopy(main_backgrounds[screen].pal, BG_PALETTE, BG0_RESERVED_PAL_SPACE/2);
-	swiCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MAP_BASE), main_backgrounds[screen].mapLen/2);
-	
 	if ( screen != WAIT) {
-		swiCopy(sub_backgrounds[screen].tiles, BG_TILE_RAM_SUB(GB_BG_TILE_BASE), sub_backgrounds[screen].tilesLen/2);
-		swiCopy(sub_backgrounds[screen].pal, BG_PALETTE_SUB, BG0_RESERVED_PAL_SPACE/2);
-		swiCopy(sub_backgrounds[screen].map, BG_MAP_RAM_SUB(GB_BG_MAP_BASE),sub_backgrounds[screen].mapLen/2);
-	}	
+		swiCopy(main_backgrounds[screen].tiles, BG_TILE_RAM(GB_BG_TILE_BASE), main_backgrounds[screen].tilesLen/2);
+		swiCopy(main_backgrounds[screen].pal, BG_PALETTE, BG0_RESERVED_PAL_SPACE/2);
+		swiCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MAP_BASE), main_backgrounds[screen].mapLen/2);
+	}
+
+	swiCopy(sub_backgrounds[screen].tiles, BG_TILE_RAM_SUB(GB_BG_TILE_BASE), sub_backgrounds[screen].tilesLen/2);
+	swiCopy(sub_backgrounds[screen].pal, BG_PALETTE_SUB, BG0_RESERVED_PAL_SPACE/2);
+	swiCopy(sub_backgrounds[screen].map, BG_MAP_RAM_SUB(GB_BG_MAP_BASE),sub_backgrounds[screen].mapLen/2);
+	
 	
 }
 

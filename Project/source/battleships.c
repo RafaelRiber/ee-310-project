@@ -19,7 +19,10 @@ bool hosting = false;
 int place_ship_count = 0;
 
 uint8_t shots[BRD_LEN][BRD_LEN];
+int ships_received = 0;
 
+
+void wait_placement_transition(GameState *state);
 void init_ships(void) {
     player_ships[CARRIER].len = CARRIER_SIZE;
     player_ships[BATTLESHIP].len = BATTLESHIP_SIZE;
@@ -119,6 +122,7 @@ void set_to_free_coordinates(int id) {
 						
 				}
 			}
+
 			if (can_place) {
 				set_ship_coords(player_ships + id, x, y);
 				return;
@@ -319,7 +323,7 @@ void parseShot(char *buff){
 
 }
 
-void place_ships_transition(GameState *state) {
+void place_ships_transition(GameState *state, int ships_received) {
 	char buff[MSG_SIZE];
 	writeShipBuffer(buff);
 #ifndef DEBUG
@@ -331,8 +335,13 @@ void place_ships_transition(GameState *state) {
 #endif
 	play_sound_effect(SFX_LETS_DO_THIS);
 	hide_player_ships();
-	load_backgrounds(WAIT);
-	*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
+	if (!ships_received) {
+		load_backgrounds(WAIT);
+		*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
+	} else {
+		wait_placement_transition(state);
+	}
+	
 }
 
 void wait_placement_transition(GameState *state) {
@@ -448,14 +457,17 @@ void update_state(GameState* state) {
 		#endif
     	break;
     case STATE_PLACE_SHIPS:
+		if (recvMessage(SHIPS)) {
+			ships_received = 1;
+		}
 		place_ships();
 		if (place_ship_count == NUM_SHIPS) {
-			place_ships_transition(state);
+			place_ships_transition(state, ships_received);
 		}
     	break;
     case STATE_WAIT_FOR_ENEMY_PLACEMENT:
 		#ifndef DEBUG
-		if (recvMessage(SHIPS)) {
+		if (!ships_received && recvMessage(SHIPS)) {
 			wait_placement_transition(state);
 		}
 		#endif
