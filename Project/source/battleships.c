@@ -6,6 +6,8 @@
 ship player_ships[NUM_SHIPS];
 ship enemy_ships[NUM_SHIPS];
 
+int text_ids[NUM_TXT_IDS];
+
 const int SHIP_SIZES[NUM_SHIPS]= {
     [CARRIER] = CARRIER_SIZE,
     [BATTLESHIP] = BATTLESHIP_SIZE,
@@ -20,7 +22,7 @@ int place_ship_count = 0;
 
 uint8_t shots[BRD_LEN][BRD_LEN];
 
-void init_ships(void) {
+void init_game(void) {
     player_ships[CARRIER].len = CARRIER_SIZE;
     player_ships[BATTLESHIP].len = BATTLESHIP_SIZE;
     player_ships[CRUISER].len = CRUISER_SIZE;
@@ -57,6 +59,12 @@ void init_ships(void) {
     }
 
 	player_target.is_hidden = 1;
+
+	// Init. text
+	text_ids[TXT_WAIT] = new_text("WAITING FOR ENEMY", 48,0,0);
+	text_ids[TXT_GAME_OVER] = new_text("GAME OVER", 100,100,0);
+	text_ids[TXT_STATUS] = new_text("STATUSSSS", 48,0,1);
+
 	return;
 }
 void set_ship_coords(ship * s, int x, int y) {
@@ -311,7 +319,7 @@ void place_ships_transition(GameState *state) {
 	for (i = 0; i < NUM_SHIPS; i++) enemy_ships[i] = player_ships[i];
 #endif
 	play_sound_effect(SFX_LETS_DO_THIS);
-	hide_player_ships();
+	//hide_player_ships();
 	load_backgrounds(WAIT);
 	*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
 }
@@ -337,10 +345,8 @@ void wait_placement_transition(GameState *state) {
 	//-------------------------------------------------------------------------------------------------------------------
 #endif
 	if (!hosting) {
-		load_backgrounds(WAIT); //TODO: CHANGE TO MAIN SCREEN ?
 		*state = STATE_WAITING_FOR_TURN;
 	} else {
-		show_player_ships();
 		*state = STATE_TAKING_TURN;
 	}
 }
@@ -353,6 +359,7 @@ void wait_turn_transition(GameState *state) {
 	#endif
 
 	load_backgrounds(GAME);
+	show_player_ships();
 	*state = STATE_TAKING_TURN;
 
 }
@@ -366,8 +373,8 @@ void check_win_transition(GameState *state) {
 		new_text("YOU LOSE", 100, 100, 0);
 		*state = STATE_LOSE;
 	} else {
-		load_backgrounds(WAIT);
-		hide_player_ships();
+		//load_backgrounds(WAIT);
+		//hide_player_ships();
 		*state = STATE_WAITING_FOR_TURN;
 	}
 }
