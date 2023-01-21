@@ -7,7 +7,7 @@
 int main(void) {
 
     //consoleDemoInit();
-	init_ships();
+	init_game();
 	init_audio();
 	play_music();
 	configure_interrupts();

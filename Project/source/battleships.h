@@ -17,6 +17,12 @@
 //The 1990 Milton Bradley version
 enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};
 
+enum text{TXT_WAIT, TXT_GAME_OVER, TXT_STATUS};
+
+#define NUM_TXT_IDS 3
+
+extern int text_ids[NUM_TXT_IDS];
+
 #define BRD_LEN 10
 
 #define NUM_SHIPS 5
@@ -62,6 +68,8 @@ typedef struct target {
     uint8_t is_hidden;
 } target;
 
+
+
 extern target player_target;
 //game data
 extern ship player_ships[NUM_SHIPS];
@@ -69,7 +77,7 @@ extern ship enemy_ships[NUM_SHIPS];
 
 extern bool hosting;
 
-void init_ships(void);
+void init_game(void);
 
 // Game FSM
 
