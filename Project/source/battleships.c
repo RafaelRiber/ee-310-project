@@ -281,9 +281,24 @@ void initEnemyShips(char *buff) {
 	}
 }
 
-void parseShot(char *buff){
+void updateShipHits(char coord) {
+	int x,y,i,j;
+	int isHit = 0;
+	x = GET_X(coord);
+	y = GET_Y(coord);
+	for (i = 0; i < NUM_SHIPS; i++) {
+		for (j = 0; j < player_ships[i].len; j++) {
+			if (x == GET_X(player_ships[i].coords[j])
+					&& y == GET_Y(player_ships[i].coords[j])) {
+				player_ships[i].hits++;
+				isHit = 1;
+			}
+		}
+	}
+	new_shot_sprite(isHit, x, y, 0);
 
 }
+
 
 void place_ships_transition(GameState *state) {
 	char buff[MSG_SIZE];
@@ -333,12 +348,12 @@ void wait_placement_transition(GameState *state) {
 // Update sprites with new shot (check if hit or miss)
 void wait_turn_transition(GameState *state) {
 
-#ifndef DEBUG
-	parseShot(recv_buffer + HEADER_LEN);
-#endif
+	#ifndef DEBUG
+	updateShipHits(recv_buffer[HEADER_LEN]);
+	#endif
 
-load_backgrounds(GAME);
-*state = STATE_TAKING_TURN;
+	load_backgrounds(GAME);
+	*state = STATE_TAKING_TURN;
 
 }
 
