@@ -9,16 +9,16 @@ int main(void) {
     //consoleDemoInit();
 	configure_interrupts();
 	init_game();
+	init_scores();
 	init_audio();
 	play_music();
     configure_graphics();
     load_backgrounds(MAIN_MENU);
 	int wifi_text = new_text("loading wifi", 150, 180,1);
     wifi_init();
-    initScores();
-    fatInitDefault();
-	writeScores(NULL);
-    displayScores();
+    read_scores();
+    display_scores();
+    write_scores();
 	update_text(wifi_text, "", -1,-1);
 	// Initialize game FSM
 	GameState state = STATE_HOME; 
