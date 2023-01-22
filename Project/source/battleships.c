@@ -345,6 +345,9 @@ int updateShipHits(char coord) {
 		}
 	}
 	new_shot_sprite(isHit, x, y, 0);
+
+	if (isHit) play_sound_effect(SFX_EXPLOSION);
+	else play_sound_effect(SFX_SPLASH);
 	return 0;
 }
 
