@@ -14,7 +14,8 @@ typedef enum text_errors {NONE, MEM_ERR, INDEX_OUT_OF_BOUNDS, INVALID_PARAM } te
 
 
 // initialise text api with tile mode setup map and tile pointers for main and sub engines.
-int init_text_api(u16 * map_main, u16* tile_main, u16 *map_sub, u16* tile_sub);
+// palette offsets should first available pal index, assumes all following are available. 
+int init_text_api(u16 * map_main, u16* tile_main, u16 *map_sub, u16* tile_sub, int main_pal_off, int sub_pal_off);
 
 /*
     adds new text obj to datastructure and returns its id.

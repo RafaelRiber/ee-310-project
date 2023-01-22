@@ -8,13 +8,13 @@ ship enemy_ships[NUM_SHIPS];
 
 int text_ids[NUM_TXT_IDS];
 
-const int SHIP_SIZES[NUM_SHIPS]= {
-    [CARRIER] = CARRIER_SIZE,
-    [BATTLESHIP] = BATTLESHIP_SIZE,
-    [CRUISER] = CRUISER_SIZE,
-    [SUBMARINE] = SUBMARINE_SIZE,
-    [DESTROYER] = DESTROYER_SIZE
-};
+// const int SHIP_SIZES[NUM_SHIPS]= {
+//     [CARRIER] = CARRIER_SIZE,
+//     [BATTLESHIP] = BATTLESHIP_SIZE,
+//     [CRUISER] = CRUISER_SIZE,
+//     [SUBMARINE] = SUBMARINE_SIZE,
+//     [DESTROYER] = DESTROYER_SIZE
+// };
 
 target player_target;
 bool hosting = false;
@@ -91,8 +91,8 @@ bool is_ship_overlapped(int ship_index) {
     int i, j, k;
     for(i = 0; i < ship_index; i++) {
         if(i == ship_index) continue;
-        for(j = 0; j < SHIP_SIZES[i]; j++) {
-            for (k = 0; k < SHIP_SIZES[ship_index]; k++) {
+        for(j = 0; j < player_ships[i].len; j++) {
+            for (k = 0; k < player_ships[ship_index].len; k++) {
                 if(player_ships[i].coords[j] == player_ships[ship_index].coords[k])
                     return true;
             }
@@ -280,7 +280,7 @@ bool all_ships_received() {
 bool game_won() {
     int i;
     for (i = 0; i < NUM_SHIPS; i++) {
-        if (enemy_ships[i].hits < SHIP_SIZES[i]) {
+        if (enemy_ships[i].hits < enemy_ships[i].len) {
             return false;
         }
     }
@@ -292,7 +292,7 @@ bool game_won() {
 bool game_lost() {
     int i;
     for (i = 0; i < NUM_SHIPS; i++) {
-        if (player_ships[i].hits < SHIP_SIZES[i]) {
+        if (player_ships[i].hits < player_ships[i].len) {
             return false;
         }
     }

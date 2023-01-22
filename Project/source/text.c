@@ -1,6 +1,6 @@
 #include "text.h"
 #include "textmap.h"
-
+#include "stdio.h"
 #include "string.h"
 #include "ctype.h"
 typedef struct text_obj {
@@ -18,6 +18,12 @@ u16 * map_ptr_main;
 u16 * tile_ptr_main;
 u16 * map_ptr_sub;
 u16 * tile_ptr_sub;
+
+u16 * pal_main;
+u16 * pal_sub;
+int pal_count;
+
+const int maxpal = 255;
 
 #define ASCII_A 97
 #define ASCII_Z 122
@@ -58,7 +64,7 @@ void clear_map_portion(u16* map, int x, int y, int len) {
     }
 }
 
-int init_text_api(u16 * map_main, u16* tile_main, u16 *map_sub, u16* tile_sub) {
+int init_text_api(u16 * map_main, u16* tile_main, u16 *map_sub, u16* tile_sub, int pal_off_main, int pal_off_sub) {
     if (map_main == NULL || tile_main == NULL || map_sub == NULL || tile_sub == NULL)
         return -1;
     map_ptr_main = map_main;
@@ -66,14 +72,21 @@ int init_text_api(u16 * map_main, u16* tile_main, u16 *map_sub, u16* tile_sub) {
     map_ptr_sub = map_sub;
     tile_ptr_sub = tile_sub;
     
-    ((u16*)textmapPal)[1] = ARGB16(1, 31, 31, 31);
-    dmaCopy(textmapPal+1, BG_PALETTE+255, sizeof(u16));
-    dmaCopy(textmapPal+1, BG_PALETTE_SUB+255, sizeof(u16));
-   // BG_PALETTE_SUB[255] = ; 
+
+    int pal_off = pal_off_main;
+    if (pal_off_sub > pal_off)
+        pal_off = pal_off_sub;
+    pal_main = BG_PALETTE + pal_off;
+    pal_sub = BG_PALETTE_SUB + pal_off;
+    
+    //((u16*)textmapPal)[1] = ARGB16(1, 31, 31, 31);
+    dmaCopy(textmapPal+1, pal_main, sizeof(u16));
+    dmaCopy(textmapPal+1, pal_sub, sizeof(u16));
+   
     int i;
     for (i = 0; i < textmapTilesLen; i ++) {
         if (((u8*)textmapTiles)[i] > 0) {
-            ((u8*)textmapTiles)[i] = (u8)255;
+            ((u8*)textmapTiles)[i] = (u8)pal_off;
         }
     }
 
