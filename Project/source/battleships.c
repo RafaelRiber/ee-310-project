@@ -410,7 +410,7 @@ void check_win_transition(GameState *state, GameState stateIfNotOver) {
 		start_timer();
 		
 	} else if (game_lost()) {
-		increment_scores(1, count_shots(), count_hits());
+		increment_scores(0, count_shots(), count_hits());
 		update_text(text_ids[TXT_WAIT], "YOU LOSE", -1, -1);
 		*state = STATE_GAMEOVER;
 		start_timer();

@@ -10,14 +10,14 @@
 #include "battleships.h"
 
 #define FILENAME "battleshipScores"
-#define SHOTS_TXT_X 62
-#define SHOTS_TXT_Y 143
+#define SHOTS_TXT_X 8
+#define SHOTS_TXT_Y 144
 
-#define HITS_TXT_X 62
-#define HITS_TXT_Y 155
+#define HITS_TXT_X 8
+#define HITS_TXT_Y 152
 
-#define WINS_TXT_X 62
-#define WINS_TXT_Y 167
+#define WINS_TXT_X 8
+#define WINS_TXT_Y 160
 
 #include <stdio.h>
 #include "fat.h"

@@ -29,7 +29,7 @@ void read_scores(){
 		if(file != NULL)
 		{
 			//Read the value and put it into the variable max_score
-			fscanf(file, "%d,%d,%d", &myScore.hitsCount, &myScore.shotsCount, &myScore.winsCount);
+			fscanf(file, "%d,%d,%d", &myScore.shotsCount, &myScore.hitsCount, &myScore.winsCount);
 			// close the file
 			fclose(file);
 		}
@@ -40,7 +40,7 @@ void write_scores(){
 		if(file != NULL)
 		{
 			//Print the values in the file
-			fprintf(file, "%d,%d,%d", myScore.hitsCount, myScore.shotsCount, myScore.winsCount);
+			fprintf(file, "%d,%d,%d", myScore.shotsCount, myScore.hitsCount, myScore.winsCount);
 			//Close the file
 			fclose(file);
 		}
@@ -48,9 +48,9 @@ void write_scores(){
 
 void display_scores(){
 	char shots_str[10], hits_str[10], wins_str[10];
-	snprintf(shots_str, sizeof(shots_str), "%d", myScore.shotsCount);
-	snprintf(hits_str, sizeof(hits_str), "%d", myScore.hitsCount);
-	snprintf(wins_str, sizeof(wins_str), "%d", myScore.winsCount);
+	snprintf(shots_str, sizeof(shots_str), "Shots %d", myScore.shotsCount);
+	snprintf(hits_str, sizeof(hits_str), "Hits  %d", myScore.hitsCount);
+	snprintf(wins_str, sizeof(wins_str), "Wins  %d", myScore.winsCount);
 	update_text(myScore.shots_txt_id, shots_str, -1, -1);
 	update_text(myScore.hits_txt_id, hits_str, -1, -1);
 	update_text(myScore.wins_txt_id, wins_str, -1, -1);
