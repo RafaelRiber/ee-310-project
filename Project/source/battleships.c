@@ -270,6 +270,10 @@ void place_target(GameState *state) {
     	isHit = shot_successful(&player_target);
     	if (shots[x_current][y_current] == 0) {
     		new_shot_sprite(isHit, x_current,y_current, 1);
+    		if (isHit){
+    			play_sound_effect(SFX_EXPLOSION);
+    		}
+    		else play_sound_effect(SFX_SPLASH);
     		shots[x_current][y_current] = 1;
     		sendMessage(SHOT, (char*) &player_target.coords); //shot is a uint8
     		player_target.is_hidden = 1;
@@ -362,6 +366,9 @@ int updateShipHits(char coord) {
 		}
 	}
 	new_shot_sprite(isHit, x, y, 0);
+
+	if (isHit) play_sound_effect(SFX_EXPLOSION);
+	else play_sound_effect(SFX_SPLASH);
 	return 0;
 }
 
