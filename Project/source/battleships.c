@@ -61,8 +61,10 @@ void init_game(void) {
     		enemy_shots[i][j] = 0;
     	}
     }
-
+    ships_received = 0;
+    place_ship_count = 0;
 	player_target.is_hidden = 1;
+	set_target_coords(0,0);
 	return;
 }
 void set_ship_coords(ship * s, int x, int y) {
