@@ -463,11 +463,6 @@ void update_state(GameState* state) {
     case STATE_HOST:
     	scanKeys();
     	keys = keysDown();
-    	//Back Button
-    	if (keys == KEY_B){
-    		load_backgrounds(MAIN_MENU);
-    		*state = STATE_HOME;
-    	}
     	// Wait for other player to join
     	if(recvMessage(JOIN) > 0) {
 			load_backgrounds(SHIP_PLACE);
@@ -480,11 +475,6 @@ void update_state(GameState* state) {
     case STATE_JOIN:
     	scanKeys();
     	keys = keysDown();
-		//Back Button
-		if (keys == KEY_B) {
-			load_backgrounds(MAIN_MENU);
-			*state = STATE_HOME;
-		}
 		sendMessage(JOIN, NULL);
     	if (recvMessage(ACK) > 0) {
 			load_backgrounds(GAME);
@@ -523,7 +513,7 @@ void update_state(GameState* state) {
     	if (recvMessage(ACK) > 0){
     		irqDisable(IRQ_KEYS);
     		update_text(text_ids[TXT_WAIT], "ENEMYS TURN", -1,-1);
-    		*state = STATE_WAITING_FOR_TURN;
+    		check_win_transition(state, STATE_WAITING_FOR_TURN);
     	}
     	break;
     case STATE_GAMEOVER:
