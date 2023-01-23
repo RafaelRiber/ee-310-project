@@ -278,7 +278,7 @@ void place_target(GameState *state) {
     		else play_sound_effect(SFX_SPLASH);
     		shots[x_current][y_current] = 1;
     		sendMessage(SHOT, (char*) &player_target.coords); //shot is a uint8
-    		update_text(text_ids[TXT_WAIT], "WAITING FOR ACK", -1,-1);
+    		update_text(text_ids[TXT_WAIT], "PACKET LOSS PRESS START", -1,-1);
     		player_target.is_hidden = 1;
     		irqEnable(IRQ_KEYS); // ENABLE KEY INTERRUPT
     		*state = STATE_SENT_SHOT;
@@ -393,9 +393,11 @@ void wait_placement_transition(GameState *state) {
 	initEnemyShips(recv_buffer + HEADER_LEN);
 
 	if (!hosting) {
+		update_text(text_ids[TXT_WAIT], "ENEMEYS TURN", -1,-1);
 		*state = STATE_WAITING_FOR_TURN;
 	} else {
 		*state = STATE_TAKING_TURN;
+		update_text(text_ids[TXT_WAIT], "YOUR TURN", -1,-1);
 	}
 }
 
@@ -445,6 +447,7 @@ void update_state(GameState* state) {
 		if (keys == KEY_A || (touch.px > JOIN_BUTTON_LEFT && touch.px < JOIN_BUTTON_RIGHT && touch.py < JOIN_BUTTON_BOTTOM && touch.py > JOIN_BUTTON_TOP)) {
 			play_sound_effect(SFX_GUN);
 			hosting = false;
+			update_text(text_ids[TXT_WAIT], "YOU ARE GUEST", -1,-1);
 			*state = STATE_JOIN;
 			load_backgrounds(WAIT);
 		}
@@ -453,6 +456,7 @@ void update_state(GameState* state) {
 			play_sound_effect(SFX_GUN);
 			hosting = true;
 			*state = STATE_HOST;
+			update_text(text_ids[TXT_WAIT], "YOU ARE HOST", -1,-1);
 			load_backgrounds(WAIT);
 		}
     	break;
