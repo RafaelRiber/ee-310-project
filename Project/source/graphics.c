@@ -26,8 +26,8 @@
 
 #define GAMEBOARD_PRIORITY 2
 #define SPRITE_PRIORITY 1
-#define SHOT_PRIORITY 1
-#define TEXT_PRIORITY 0
+#define SHOT_PRIORITY 0
+#define TEXT_PRIORITY 1
 
 
 #define HIT_IDX 0 

@@ -57,9 +57,18 @@ void sendMessage(message_type type, char* body) {
             //pass
         break;
     }
-
-    sendData(send_buffer, MSG_SIZE);
     
+    if(type == ACK){
+    	sendData(send_buffer, MSG_SIZE);
+    	sendData(send_buffer, MSG_SIZE);
+    	sendData(send_buffer, MSG_SIZE);
+    	sendData(send_buffer, MSG_SIZE);
+    	sendData(send_buffer, MSG_SIZE);
+    }
+    else{
+    	sendData(send_buffer, MSG_SIZE);
+    }
+
 }
 /*
     receive message of a specified type.

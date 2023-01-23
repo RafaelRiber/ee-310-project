@@ -278,17 +278,16 @@ void place_target(GameState *state) {
     		else play_sound_effect(SFX_SPLASH);
     		shots[x_current][y_current] = 1;
     		sendMessage(SHOT, (char*) &player_target.coords); //shot is a uint8
+    		update_text(text_ids[TXT_WAIT], "WAITING FOR ACK", -1,-1);
     		player_target.is_hidden = 1;
     		irqEnable(IRQ_KEYS); // ENABLE KEY INTERRUPT
-    		check_win_transition(state, STATE_WAITING_FOR_TURN);
-    		update_text(text_ids[TXT_WAIT], "Enemys Turn", -1, -1);
+    		*state = STATE_SENT_SHOT;
     	}
     	else {
     		play_sound_effect(SFX_ERROR);
     	}
 		break;
     }
-    //irqDisable(IRQ_TIMER0);
 }
 
 bool all_ships_received() {
@@ -415,12 +414,14 @@ void check_win_transition(GameState *state, GameState stateIfNotOver) {
 	if (game_won()) {
 		increment_scores(1, count_shots(), count_hits());
 		update_text(text_ids[TXT_WAIT], "YOU WIN", -1, -1);
+		play_sound_effect(SFX_GAME_OVER);
 		*state = STATE_GAMEOVER;
 		start_timer();
 		
 	} else if (game_lost()) {
 		increment_scores(0, count_shots(), count_hits());
 		update_text(text_ids[TXT_WAIT], "YOU LOSE", -1, -1);
+		play_sound_effect(SFX_GAME_OVER);
 		*state = STATE_GAMEOVER;
 		start_timer();
 	} else {
@@ -504,7 +505,7 @@ void update_state(GameState* state) {
 
     case STATE_WAITING_FOR_TURN:
     	if (recvMessage(SHOT)){
-    		irqDisable(IRQ_KEYS); // DISABLE KEY INTERRUPT
+    		sendMessage(ACK,NULL); // Acknowledge that a shot has been received.
     		if (updateShipHits(recv_buffer[HEADER_LEN]) == 0){
     			wait_turn_transition(state);
     		}
@@ -514,6 +515,13 @@ void update_state(GameState* state) {
     case STATE_TAKING_TURN:
     	place_target(state);
         break;
+    case STATE_SENT_SHOT:
+    	if (recvMessage(ACK) > 0){
+    		irqDisable(IRQ_KEYS);
+    		update_text(text_ids[TXT_WAIT], "ENEMYS TURN", -1,-1);
+    		*state = STATE_WAITING_FOR_TURN;
+    	}
+    	break;
     case STATE_GAMEOVER:
 		// TODO: Display "you win" message
 		// TODO: Increment wins and shots/hits stats in file
