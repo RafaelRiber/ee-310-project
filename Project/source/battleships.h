@@ -15,11 +15,7 @@
 //The 1990 Milton Bradley version
 enum ship_type{CARRIER, BATTLESHIP, CRUISER, SUBMARINE, DESTROYER};
 
-enum text{TXT_WAIT, TXT_GAME_OVER, TXT_STATUS};
-
-#define NUM_TXT_IDS 3
-
-extern int text_ids[NUM_TXT_IDS];
+extern int status_txt_id;
 
 #define BRD_LEN 10
 

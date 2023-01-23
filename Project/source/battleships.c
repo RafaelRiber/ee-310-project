@@ -6,7 +6,8 @@
 ship player_ships[NUM_SHIPS];
 ship enemy_ships[NUM_SHIPS];
 
-int text_ids[NUM_TXT_IDS];
+//int status_txt_id;
+int status_txt_id;
 
 // const int SHIP_SIZES[NUM_SHIPS]= {
 //     [CARRIER] = CARRIER_SIZE,
@@ -278,7 +279,7 @@ void place_target(GameState *state) {
     		else play_sound_effect(SFX_SPLASH);
     		shots[x_current][y_current] = 1;
     		sendMessage(SHOT, (char*) &player_target.coords); //shot is a uint8
-    		update_text(text_ids[TXT_WAIT], "PACKET LOSS PRESS START", -1,-1);
+    		update_text(status_txt_id, "PACKET LOSS PRESS START", -1,-1);
     		player_target.is_hidden = 1;
     		irqEnable(IRQ_KEYS); // ENABLE KEY INTERRUPT
     		*state = STATE_SENT_SHOT;
@@ -393,11 +394,11 @@ void wait_placement_transition(GameState *state) {
 	initEnemyShips(recv_buffer + HEADER_LEN);
 
 	if (!hosting) {
-		update_text(text_ids[TXT_WAIT], "ENEMEYS TURN", -1,-1);
+		update_text(status_txt_id, "ENEMEYS TURN", -1,-1);
 		*state = STATE_WAITING_FOR_TURN;
 	} else {
 		*state = STATE_TAKING_TURN;
-		update_text(text_ids[TXT_WAIT], "YOUR TURN", -1,-1);
+		update_text(status_txt_id, "YOUR TURN", -1,-1);
 	}
 }
 
@@ -406,7 +407,7 @@ void wait_turn_transition(GameState *state) {
 	load_backgrounds(GAME);
 	show_player_ships();
 	check_win_transition(state, STATE_TAKING_TURN);
-	update_text(text_ids[TXT_WAIT], "Your Turn", -1, -1);
+	update_text(status_txt_id, "Your Turn", -1, -1);
 
 }
 
@@ -415,14 +416,14 @@ void check_win_transition(GameState *state, GameState stateIfNotOver) {
 
 	if (game_won()) {
 		increment_scores(1, count_shots(), count_hits());
-		update_text(text_ids[TXT_WAIT], "YOU WIN", -1, -1);
+		update_text(status_txt_id, "YOU WIN", -1, -1);
 		play_sound_effect(SFX_GAME_OVER);
 		*state = STATE_GAMEOVER;
 		start_timer();
 		
 	} else if (game_lost()) {
 		increment_scores(0, count_shots(), count_hits());
-		update_text(text_ids[TXT_WAIT], "YOU LOSE", -1, -1);
+		update_text(status_txt_id, "YOU LOSE", -1, -1);
 		play_sound_effect(SFX_GAME_OVER);
 		*state = STATE_GAMEOVER;
 		start_timer();
@@ -447,7 +448,7 @@ void update_state(GameState* state) {
 		if (keys == KEY_A || (touch.px > JOIN_BUTTON_LEFT && touch.px < JOIN_BUTTON_RIGHT && touch.py < JOIN_BUTTON_BOTTOM && touch.py > JOIN_BUTTON_TOP)) {
 			play_sound_effect(SFX_GUN);
 			hosting = false;
-			update_text(text_ids[TXT_WAIT], "YOU ARE GUEST", -1,-1);
+			update_text(status_txt_id, "YOU ARE GUEST", -1,-1);
 			*state = STATE_JOIN;
 			load_backgrounds(WAIT);
 		}
@@ -456,7 +457,7 @@ void update_state(GameState* state) {
 			play_sound_effect(SFX_GUN);
 			hosting = true;
 			*state = STATE_HOST;
-			update_text(text_ids[TXT_WAIT], "YOU ARE HOST", -1,-1);
+			update_text(status_txt_id, "YOU ARE HOST", -1,-1);
 			load_backgrounds(WAIT);
 		}
     	break;
@@ -468,6 +469,7 @@ void update_state(GameState* state) {
 			load_backgrounds(SHIP_PLACE);
 			hide_scores();
 			*state = STATE_PLACE_SHIPS;
+			update_text(status_txt_id, "PLACE SHIPS", -1,-1);
 			sendMessage(ACK,NULL);
     	}
 
@@ -479,6 +481,7 @@ void update_state(GameState* state) {
     	if (recvMessage(ACK) > 0) {
 			load_backgrounds(GAME);
 			hide_scores();
+			update_text(status_txt_id, "PLACE SHIPS", -1,-1);
 			*state = STATE_PLACE_SHIPS;
 		}
     	break;
@@ -496,7 +499,6 @@ void update_state(GameState* state) {
 			wait_placement_transition(state);
 		}
     	break;
-
     case STATE_WAITING_FOR_TURN:
     	if (recvMessage(SHOT)){
     		sendMessage(ACK,NULL); // Acknowledge that a shot has been received.
@@ -505,14 +507,13 @@ void update_state(GameState* state) {
     		}
     	}
     	break;
-
     case STATE_TAKING_TURN:
     	place_target(state);
         break;
     case STATE_SENT_SHOT:
     	if (recvMessage(ACK) > 0){
     		irqDisable(IRQ_KEYS);
-    		update_text(text_ids[TXT_WAIT], "ENEMYS TURN", -1,-1);
+    		update_text(status_txt_id, "ENEMYS TURN", -1,-1);
     		check_win_transition(state, STATE_WAITING_FOR_TURN);
     	}
     	break;

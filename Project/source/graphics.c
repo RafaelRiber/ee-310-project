@@ -268,11 +268,7 @@ void configure_graphics() {
 
 
 	// Init. text
-	text_ids[TXT_WAIT] = new_text("", 48,0,0);
-	text_ids[TXT_GAME_OVER] = new_text("", 100,100,0);
-	text_ids[TXT_STATUS] = new_text("", 48,0,1);
-
-
+	status_txt_id = new_text("", 48,0,0);
 }
 
 void load_backgrounds(int screen) {
