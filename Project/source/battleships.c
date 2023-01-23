@@ -134,9 +134,6 @@ void set_target_coords(int x, int y) {
 	player_target.coords = SET_Y(player_target.coords, y);
 }
 
-
-// Game FSM
-
 /*
  * Function to check if ship overlaps with previously placed ships.
  */
@@ -431,6 +428,10 @@ int updateShipHits(char coord) {
 	return 0;
 }
 
+/*
+ * Transition from ship placement to next state
+ */
+
 void place_ships_transition(GameState *state, int ships_received) {
 	char buff[MSG_SIZE];
 	writeShipBuffer(buff);
@@ -439,11 +440,16 @@ void place_ships_transition(GameState *state, int ships_received) {
 	if (!ships_received) {
 		load_backgrounds(WAIT);
 		hide_player_ships();
+		update_text(status_txt_id, "", -1,-1);
 		*state = STATE_WAIT_FOR_ENEMY_PLACEMENT;
 	} else {
 		wait_placement_transition(state);
 	}
 }
+
+/*
+ * Transition from wait for enemy placement to next state
+ */
 
 void wait_placement_transition(GameState *state) {
 	show_player_ships();
@@ -451,7 +457,7 @@ void wait_placement_transition(GameState *state) {
 	initEnemyShips(recv_buffer + HEADER_LEN);
 
 	if (!hosting) {
-		update_text(status_txt_id, "ENEMEYS TURN", -1,-1);
+		update_text(status_txt_id, "ENEMYS TURN", -1,-1);
 		*state = STATE_WAITING_FOR_TURN;
 	} else {
 		*state = STATE_TAKING_TURN;
@@ -459,18 +465,21 @@ void wait_placement_transition(GameState *state) {
 	}
 }
 
-// Update sprites with new shot (check if hit or miss)
+/*
+ * Transition from waiting for enemy turn to next state
+ */
 void wait_turn_transition(GameState *state) {
 	load_backgrounds(GAME);
 	show_player_ships();
 	check_win_transition(state, STATE_TAKING_TURN);
-	update_text(status_txt_id, "Your Turn", -1, -1);
-
 }
+
+/*
+ * Check win and transition to "stateIfNotOver" if the game is not over
+ */
 
 void check_win_transition(GameState *state, GameState stateIfNotOver) {
 	// Check if the game has been won or lost
-
 	if (game_won()) {
 		increment_scores(1, count_shots(), count_hits());
 		update_text(status_txt_id, "YOU WIN", -1, -1);
@@ -485,11 +494,19 @@ void check_win_transition(GameState *state, GameState stateIfNotOver) {
 		*state = STATE_GAMEOVER;
 		start_timer();
 	} else {
-		//load_backgrounds(WAIT);
-		//hide_player_ships();
 		*state = stateIfNotOver;
 	}
 }
+
+/*
+ * Game FSM
+ * Initial state is STATE_HOME.
+ * Players choose if they host or join a game, then place their ships on the board.
+ * Ships are sent to other player and then all game logic is done locally.
+ * Shots are sent upon placement. In case of packet drop, the START key interrupt resends the shot message to other player.
+ * A check is made every time a turn takes place to check for game over.
+ *
+ */
 
 void update_state(GameState* state) {
 	touchPosition touch;
@@ -575,9 +592,6 @@ void update_state(GameState* state) {
     	}
     	break;
     case STATE_GAMEOVER:
-		// TODO: Display "you win" message
-		// TODO: Increment wins and shots/hits stats in file
-		// TODO: Prompt forrestart
 		if (is_seconds(GAME_OVER_SCREEN_TIME)) {
 			*state = STATE_HOME;
 			display_scores();
@@ -585,6 +599,7 @@ void update_state(GameState* state) {
 			hide_player_ships();
 			clear_shots();
 			init_game();
+			update_text(status_txt_id, "", -1,-1);
 			load_backgrounds(MAIN_MENU);
 			player_target.is_hidden = 1;
 		}
