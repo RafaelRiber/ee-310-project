@@ -6,7 +6,7 @@
 
 int main(void) {
 
-    //consoleDemoInit();
+    
 	configure_interrupts();
 	init_game();
 	init_scores();
@@ -22,6 +22,8 @@ int main(void) {
 	update_text(wifi_text, "", -1,-1);
 	// Initialize game FSM
 	GameState state = STATE_HOME; 
+
+
     while(1){
     	update_state(&state);
         update_ships();
