@@ -1,9 +1,5 @@
-/*
- * storage.h
- *
- *  Created on: 20 Jan 2023
- *      Author: Rafael
- */
+// Battleships Storage Library
+// EE-310 - Tharen Candi, Rafael Riber
 
 #ifndef STORAGE_H_
 #define STORAGE_H_

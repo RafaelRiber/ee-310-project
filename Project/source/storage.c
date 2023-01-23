@@ -1,18 +1,18 @@
-/*
- * storage.c
- *
- *  Created on: 20 Jan 2023
- *      Author: Rafael
- */
-
+// Battleships Storage Library
+// EE-310 - Tharen Candi, Rafael Riber
 
 #include "storage.h"
 #include "text.h"
 
-
+// Filename
 static const char *FILENAME_TXT = "/battleshipScores.txt";
+
+// Declare score structure
 score myScore;
 
+/*
+ * Initializes the score struct with zeros, and creates text IDs
+ */
 void init_scores(){
 	fatInitDefault();
 	myScore.shotsCount = 0;
@@ -23,6 +23,9 @@ void init_scores(){
 	myScore.wins_txt_id = new_text("", WINS_TXT_X, WINS_TXT_Y, 1);
 }
 
+/*
+ * Reads score from SD and updates score struct with read data
+ */
 void read_scores(){
 //	//Open the file in read mode
 	FILE *file = fopen(FILENAME_TXT, "r");
@@ -35,6 +38,9 @@ void read_scores(){
 		}
 }
 
+/*
+ * Write score structure to file.
+ */
 void write_scores(){
 	FILE *file = fopen(FILENAME_TXT, "w+");
 		if(file != NULL)
@@ -45,6 +51,10 @@ void write_scores(){
 			fclose(file);
 		}
 }
+
+/*
+ * Display scores on screen using text IDs
+ */
 
 void display_scores(){
 	char shots_str[10], hits_str[10], wins_str[10];
@@ -57,12 +67,19 @@ void display_scores(){
 
 }
 
+
+/*
+ * Update score text to hide score
+ */
 void hide_scores() {
 	update_text(myScore.shots_txt_id, "", -1, -1);
 	update_text(myScore.hits_txt_id, "", -1, -1);
 	update_text(myScore.wins_txt_id, "", -1, -1);
 }
 
+/*
+ * Increment score struct with finished game stats
+ */
 void increment_scores(int wonGame, int shotsMade, int hitsMade){
 	myScore.winsCount = myScore.winsCount + wonGame;
 	myScore.shotsCount = myScore.shotsCount + shotsMade;

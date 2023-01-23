@@ -17,7 +17,7 @@ extern u16* gfx;
 void configure_graphics();
 void update_ships();
 void allocate_sprite(u16 ** gfx, const unsigned int * tiles, unsigned int tilesLen, char isMain );
-void new_shot_sprite(int isHit, int x, int y, int is_main);
+void new_shot_tile(int isHit, int x, int y, int is_main);
 void load_backgrounds(int screen);
 void hide_player_ships();
 void show_player_ships();

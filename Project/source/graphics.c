@@ -293,7 +293,7 @@ void load_backgrounds(int screen) {
 
 // put a hit or miss on the enemey board.
 // x and y are ga,eboard cordinates 0-9
-void new_shot_sprite(int isHit, int x, int y, int is_main){
+void new_shot_tile(int isHit, int x, int y, int is_main){
 
 	u16 * map = (u16*) BG_MAP_RAM(SHOT_MAP_BASE);
 	if (!is_main)

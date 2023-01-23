@@ -3,27 +3,33 @@
 #include "text.h"
 #include <stdio.h>
 
+// Player and enemy ship structures
 ship player_ships[NUM_SHIPS];
 ship enemy_ships[NUM_SHIPS];
 
-//int status_txt_id;
+// Text ID of the status text
 int status_txt_id;
 
-// const int SHIP_SIZES[NUM_SHIPS]= {
-//     [CARRIER] = CARRIER_SIZE,
-//     [BATTLESHIP] = BATTLESHIP_SIZE,
-//     [CRUISER] = CRUISER_SIZE,
-//     [SUBMARINE] = SUBMARINE_SIZE,
-//     [DESTROYER] = DESTROYER_SIZE
-// };
-
+// Target structure for player aiming
 target player_target;
+
+// True if hosting game, false if joining game
 bool hosting = false;
+
+// Counter for ships placed
 int place_ship_count = 0;
 
+// Player and enemy shots array.
+// Used to keep track of already placed shots to avoid stacking them
 uint8_t shots[BRD_LEN][BRD_LEN];
 uint8_t enemy_shots[BRD_LEN][BRD_LEN];
+
+// Counter for number of ships received
 int ships_received = 0;
+
+/*
+ * Count how many shots have been taken by player using shots array
+ */
 
 int count_shots() {
     int count = 0;
@@ -37,6 +43,9 @@ int count_shots() {
     return count;
 }
 
+/*
+ * Count the number of successful shots taken by player
+ */
 
 int count_hits() {
 	int count = 0;
@@ -46,8 +55,17 @@ int count_hits() {
 	return count;
 }
 
+/*
+ * Transition from STATE_WAIT_PLACEMENT to next state
+ */
+
 void wait_placement_transition(GameState *state);
+
+/*
+ * Game initialization
+ */
 void init_game(void) {
+	// Set ship lengths
     player_ships[CARRIER].len = CARRIER_SIZE;
     player_ships[BATTLESHIP].len = BATTLESHIP_SIZE;
     player_ships[CRUISER].len = CRUISER_SIZE;
@@ -60,11 +78,11 @@ void init_game(void) {
     enemy_ships[SUBMARINE].len = SUBMARINE_SIZE;
     enemy_ships[DESTROYER].len = DESTROYER_SIZE;
 
-
+    // Initialize ship properties
     int i,j;
-
     for (i = 0; i < NUM_SHIPS; i ++) {
         player_ships[i].hits = 0;
+        // Hide all ships at first
 		player_ships[i].is_hidden = 1;
 		player_ships[i].is_horizontal = 1;
         enemy_ships[i].hits = 0;
@@ -76,7 +94,7 @@ void init_game(void) {
         set_ship_coords(&enemy_ships[i], 0, 0);
 
     }
-
+    // Set shot arrays to zero
     for (i = 0; i < BRD_LEN; i++){
     	for (j = 0; j < BRD_LEN; j++){
     		shots[i][j] = 0;
@@ -89,6 +107,11 @@ void init_game(void) {
 	set_target_coords(0,0);
 	return;
 }
+
+/*
+ * Moves a ship to a specified coordinate, and handles
+ * transformation for horizontal or vertical
+ */
 void set_ship_coords(ship * s, int x, int y) {
     int i;
     for (i = 0; i < s->len ; i ++) {
@@ -102,6 +125,10 @@ void set_ship_coords(ship * s, int x, int y) {
     }
 }
 
+/*
+ * Moves the target to a specified coordinate
+ */
+
 void set_target_coords(int x, int y) {
 	player_target.coords = SET_X(player_target.coords, x);
 	player_target.coords = SET_Y(player_target.coords, y);
@@ -110,7 +137,9 @@ void set_target_coords(int x, int y) {
 
 // Game FSM
 
-// Function to check if ship overlaps with previously placed ships
+/*
+ * Function to check if ship overlaps with previously placed ships.
+ */
 bool is_ship_overlapped(int ship_index) {
     int i, j, k;
     for(i = 0; i < ship_index; i++) {
@@ -124,6 +153,11 @@ bool is_ship_overlapped(int ship_index) {
     }
     return false;
 }
+
+/*
+ * Place ship on first available coordinates to
+ * avoid ships appearing under already placed ships when starting to place them
+ */
 
 void set_to_free_coordinates(int id) {
 	if (id == 0)
@@ -160,13 +194,19 @@ void set_to_free_coordinates(int id) {
 	
 }
 
+/*
+ * Place ships on the game board.
+ * UP/DOWN/LEFT/RIGHT to move ship
+ * B to rotate current ship
+ * A to place ship
+ * Ships are blinked with timer0 interrupt while being placed
+ */
 void place_ships() {
 	irqEnable(IRQ_TIMER0);
     scanKeys();
     u16 keys = keysDown();
 
-    //player_ships[0].is_hidden = 0;
-
+    // Get current ship coordinates
     int x_current = GET_X(player_ships[place_ship_count].coords[0]);
     int y_current = GET_Y(player_ships[place_ship_count].coords[0]);
 
@@ -215,7 +255,7 @@ void place_ships() {
 			if (!is_ship_overlapped(place_ship_count)) {
 				place_ship_count++;
 				set_to_free_coordinates(place_ship_count);
-				play_sound_effect(SFX_GUN);
+				play_sound_effect(SFX_GUN); // Play sound effect upon ship placement
 				player_ships[place_ship_count].is_hidden = 0; // Show the next ship.
 			}
 		}
@@ -229,14 +269,18 @@ void place_ships() {
     irqDisable(IRQ_TIMER0);
 }
 
+/*
+ * Check if a shot is successful
+ */
 bool shot_successful(target* target){
 	int x,y,i,j;
 	x = GET_X(target->coords);
 	y = GET_Y(target->coords);
-
+	// Check if target coordinates match with a block from an enemy ship
 	for (i = 0; i < NUM_SHIPS; i++) {
 			for (j = 0; j < enemy_ships[i].len; j++) {
 				if (x == GET_X(enemy_ships[i].coords[j]) && y == GET_Y(enemy_ships[i].coords[j])){
+					// Increment enemy ship hit counter if hit successful
 					enemy_ships[i].hits++;
 					return true;
 				}
@@ -244,6 +288,13 @@ bool shot_successful(target* target){
 		}
 	return false;
 }
+
+/*
+ * Place target on the gameboard
+ * UP/DOWN/LEFT/RIGHT to move
+ * A to place shot at target location
+ * Sounds are played and tiles are displayed depending on shot success
+ */
 
 void place_target(GameState *state) {
 	//irqEnable(IRQ_TIMER0);
@@ -272,7 +323,8 @@ void place_target(GameState *state) {
     	int isHit;
     	isHit = shot_successful(&player_target);
     	if (shots[x_current][y_current] == 0) {
-    		new_shot_sprite(isHit, x_current,y_current, 1);
+    		//
+    		new_shot_tile(isHit, x_current,y_current, 1);
     		if (isHit){
     			play_sound_effect(SFX_EXPLOSION);
     		}
@@ -282,28 +334,20 @@ void place_target(GameState *state) {
     		update_text(status_txt_id, "PACKET LOSS PRESS START", -1,-1);
     		player_target.is_hidden = 1;
     		irqEnable(IRQ_KEYS); // ENABLE KEY INTERRUPT
-    		*state = STATE_SENT_SHOT;
+    		*state = STATE_SENT_SHOT; // Go to sent shot state to wait for Acknowledge
     	}
     	else {
+    		// Play error sound if there already is a shot at this location
     		play_sound_effect(SFX_ERROR);
     	}
 		break;
     }
 }
 
-bool all_ships_received() {
-    // Iterate through all ships and check if they have been received
-	int i;
-	for (i = 0; i < NUM_SHIPS; i++) {
-	        if (enemy_ships[i].len == 0) {
-	            // at least one ship has not been received
-	            return false;
-	        }
-	    }
-	    // all ships have been received
-	    return true;
-}
-
+/*
+ * Check if game is won.
+ * Player wins if all enemy ships have been sunk i.e. all blocks have been hit
+ */
 bool game_won() {
     int i;
     for (i = 0; i < NUM_SHIPS; i++) {
@@ -314,7 +358,10 @@ bool game_won() {
     return true;
 }
 
-
+/*
+ * Check if game is lost.
+ * Player loses if all their ships have been sunk i.e. all blocks have been hit
+ */
 
 bool game_lost() {
     int i;
@@ -325,6 +372,10 @@ bool game_lost() {
     }
     return true;
 }
+
+/*
+ * Write ship coordinates to a buffer for sending via WiFi
+ */
 
 void writeShipBuffer(char *buff){
 	int buff_counter = 0;
@@ -337,6 +388,10 @@ void writeShipBuffer(char *buff){
 	}
 }
 
+/*
+ * Read buffer and parse received ship coordinates
+ */
+
 void initEnemyShips(char *buff) {
 	int buff_counter = 0;
 	int i, j;
@@ -348,7 +403,9 @@ void initEnemyShips(char *buff) {
 	}
 }
 
-// Returns -1 on illegal shot received (most likely double receive due to wifi error)
+/*
+ * Returns -1 on illegal shot received (most likely double receive due to wifi error)
+ */
 int updateShipHits(char coord) {
 	int x,y,i,j;
 	int isHit = 0;
@@ -367,7 +424,7 @@ int updateShipHits(char coord) {
 			}
 		}
 	}
-	new_shot_sprite(isHit, x, y, 0);
+	new_shot_tile(isHit, x, y, 0);
 
 	if (isHit) play_sound_effect(SFX_EXPLOSION);
 	else play_sound_effect(SFX_SPLASH);

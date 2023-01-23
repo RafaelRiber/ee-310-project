@@ -1,9 +1,5 @@
-/*
- * timers.h
- *
- *  Created on: 14 Jan 2023
- *      Author: Rafael
- */
+// Battleships Timers and Interrupts
+// EE-310 - Tharen Candi, Rafael Riber
 
 #ifndef TIMERS_INTERRUPTS_H_
 #define TIMERS_INTERRUPTS_H_
