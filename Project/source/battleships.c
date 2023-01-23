@@ -33,8 +33,9 @@ int ships_received = 0;
 
 int count_shots() {
     int count = 0;
-    for (int i = 0; i < BRD_LEN; i++) {
-        for (int j = 0; j < BRD_LEN; j++) {
+    int i,j;
+    for (i = 0; i < BRD_LEN; i++) {
+        for (j = 0; j < BRD_LEN; j++) {
             if (shots[i][j] == 1) {
                 count++;
             }
@@ -49,7 +50,8 @@ int count_shots() {
 
 int count_hits() {
 	int count = 0;
-	for (int i = 0; i < NUM_SHIPS; i++) {
+	int i;
+	for (i = 0; i < NUM_SHIPS; i++) {
 		count = count + enemy_ships[i].hits;
 	}
 	return count;
