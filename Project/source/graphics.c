@@ -1,3 +1,5 @@
+// Battleships - graphics setup, sprite, gameboard and shot graphic manager.
+// ee-310 Tharen C, Rafael R
 #include <nds.h>
 #include "graphics.h"
 #include "stdio.h"
@@ -21,7 +23,7 @@
 #define TEXT_MAP_BASE 1  // [2, 4)
 #define SHOT_MAP_BASE 2 // [6, 8)
 #define GB_BG_TILE_BASE 1 // [16, 32)
-#define TEXT_TILE_BASE 4 
+#define TEXT_TILE_BASE 4  
 #define SHOT_TILE_BASE 7 
 
 #define GAMEBOARD_PRIORITY 2
@@ -33,9 +35,6 @@
 #define HIT_IDX 0 
 #define MISS_IDX 4
 #define BLANK_IDX 8
-
-#define BG0_RESERVED_PAL_SPACE sizeof(u16)*100
-
 
 
 #define NUM_SHIP_SPRITES (CARRIER_SIZE * NUM_SHIPS)
@@ -77,6 +76,9 @@ struct background {
 
 int gameboard_pal_usage_main = 0;
 int gameboard_pal_usage_sub = 0;
+
+// easily index grit produced data for various backgrounds
+// separate arrays for main and sub
 const struct background main_backgrounds[NUM_SCREENS] = {
 	[MAIN_MENU] = {
 		battleship_titleTiles,
@@ -87,12 +89,12 @@ const struct background main_backgrounds[NUM_SCREENS] = {
 		battleship_titleMapLen
 	},
 	[WAIT] = {
-	hosting_waiting_subTiles,
-	hosting_waiting_subTilesLen,
-	hosting_waiting_subPal,
-	hosting_waiting_subPalLen,
-	hosting_waiting_subMap,
-	hosting_waiting_subMapLen
+		hosting_waiting_subTiles,
+		hosting_waiting_subTilesLen,
+		hosting_waiting_subPal,
+		hosting_waiting_subPalLen,
+		hosting_waiting_subMap,
+		hosting_waiting_subMapLen
 	},
 
 	[SHIP_PLACE] = {
@@ -124,12 +126,12 @@ const struct background sub_backgrounds[NUM_SCREENS] = {
 	},
 
 	[WAIT] = {
-	hosting_waiting_subTiles,
-	hosting_waiting_subTilesLen,
-	hosting_waiting_subPal,
-	hosting_waiting_subPalLen,
-	hosting_waiting_subMap,
-	hosting_waiting_subMapLen
+		hosting_waiting_subTiles,
+		hosting_waiting_subTilesLen,
+		hosting_waiting_subPal,
+		hosting_waiting_subPalLen,
+		hosting_waiting_subMap,
+		hosting_waiting_subMapLen
 	},
 
 	[SHIP_PLACE] = {
@@ -153,9 +155,12 @@ const struct background sub_backgrounds[NUM_SCREENS] = {
 
 
 /*
-	grit palette len is max palette len. Not used palette.
-	get actual used palette size. 
-	returns atleast 1.
+	max-size - in bytes
+
+	Palettes created from grit lie about length. It is always
+	the max pal length, not what what used by the images.
+	
+	- returns bytes actually used.
 */
 int get_pal_size(const unsigned short * pal, int max_size) {
 	
@@ -172,6 +177,12 @@ int get_pal_size(const unsigned short * pal, int max_size) {
 }
 
 
+/*
+	configured all backgrounds, main and sub engine, configures sprite engine
+	initialises sprites and loads needed palletes, tiles.
+
+	initialises text_api.
+*/
 void configure_graphics() {
     //MAIN engine
 	REG_DISPCNT = MODE_0_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE | DISPLAY_BG2_ACTIVE;
@@ -193,8 +204,10 @@ void configure_graphics() {
 	BGCTRL[TEXT_BG] = BG_COLOR_256 | BG_MAP_BASE(TEXT_MAP_BASE) | BG_TILE_BASE(TEXT_TILE_BASE) | BG_32x32 | BG_PRIORITY(TEXT_PRIORITY);
 	BGCTRL_SUB[TEXT_BG] = BG_COLOR_256 | BG_MAP_BASE(TEXT_MAP_BASE) | BG_TILE_BASE(TEXT_TILE_BASE) | BG_32x32 | BG_PRIORITY(TEXT_PRIORITY);
 	
+	// ###############################################################################################################################
 	
 	// palette filling
+	// get used space to never overide unused palette space during background changes. 
 	int i;
 	for (i = 0; i < NUM_SCREENS; i++) {
 		int bg_pal_main = get_pal_size(main_backgrounds[i].pal, main_backgrounds[i].palLen);
@@ -206,11 +219,12 @@ void configure_graphics() {
 			gameboard_pal_usage_sub = bg_pal_sub;
 	}
 
+	// SHOTS PAL AND TILE SETUP
+
 	dmaCopy(shotsTiles, BG_TILE_RAM(SHOT_TILE_BASE), SHOTS_LEN);
 	dmaCopy(shotsTiles, BG_TILE_RAM_SUB(SHOT_TILE_BASE), SHOTS_LEN);
 	
-
-	//fill main pal with shot pal	manually.
+	//fill main pal with shot palmanually.
 	BG_PALETTE[HIT_PAL_IDX] = ARGB16(1,31, 0, 0);
 	BG_PALETTE[MISS_PAL_IDX] = ARGB16(1,0, 0, 31);
 	
@@ -224,7 +238,7 @@ void configure_graphics() {
 	// ###############################################################################################################################
 
 
-    //sprites
+    // SPRITE SETUP AND INIT
    
     //MAIN: Set up memory bank to work in sprite mode (offset since we are using VRAM A for backgrounds)
 	VRAM_B_CR = VRAM_ENABLE | VRAM_B_MAIN_SPRITE_0x06400000;
@@ -238,14 +252,9 @@ void configure_graphics() {
 	//target, miss, hit allocaiton
 	allocate_sprite(&player_target.sprite_buff, spritemapTiles + TARGET_SPRITE_OFFSET*64, 256, 1);
 	
-	// allocate_sprite(&hit_sprite_main, spritemapTiles + 64*HIT_SPRITE_OFFSET, 256, 1);
-	// allocate_sprite(&hit_sprite_sub, spritemapTiles + 64*HIT_SPRITE_OFFSET, 256, 0);
-	// allocate_sprite(&miss_sprite_main, spritemapTiles + 64*MISS_SPRITE_OFFSET, 256, 1);
-	// allocate_sprite(&miss_sprite_sub, spritemapTiles + 64*MISS_SPRITE_OFFSET, 256, 0);
-
+	// secondary affine for rotated ships.
 	oamRotateScale(&oamMain, 0, degreesToAngle(-90), intToFixed(1, 8), intToFixed(1, 8));
 	oamRotateScale(&oamSub, 0, degreesToAngle(-90), intToFixed(1, 8), intToFixed(1, 8));
-	
 	
 	dmaCopy(spritemapPal, (u16*)SPRITE_PALETTE, spritemapPalLen);
 	dmaCopy(spritemapPal, (u16*)SPRITE_PALETTE_SUB, spritemapPalLen);
@@ -266,15 +275,17 @@ void configure_graphics() {
 
 	num_hits_misses = 0;
 
-
 	// Init. text
 	status_txt_id = new_text("", 48,0,0);
 }
 
+/*
+	changed bg0 on main and subs based on game screen
+	int screen: screen enum 
+*/
 void load_backgrounds(int screen) {
 	if (screen > NUM_SCREENS || screen < 0)
 		return;
-
 
 	//main
 	if ( screen != WAIT) {
@@ -291,8 +302,10 @@ void load_backgrounds(int screen) {
 	
 }
 
-// put a hit or miss on the enemey board.
-// x and y are ga,eboard cordinates 0-9
+/*
+	put a hit or miss on the enemey board.
+	- x and y are gamboard cordinates 0-9
+*/
 void new_shot_sprite(int isHit, int x, int y, int is_main){
 
 	u16 * map = (u16*) BG_MAP_RAM(SHOT_MAP_BASE);
@@ -315,6 +328,9 @@ void new_shot_sprite(int isHit, int x, int y, int is_main){
 
 }
 
+/*
+	clear all hits and misses on both main and sub.
+*/
 void clear_shots() {
 	u16 * map_main = (u16*) BG_MAP_RAM(SHOT_MAP_BASE);
 	u16*map_sub = (u16*) BG_MAP_RAM_SUB(SHOT_MAP_BASE);
@@ -325,8 +341,12 @@ void clear_shots() {
 	} 
 	
 }
-//todo: merge all sprites palettes (from grit) to one sprite palette.
-uint16_t sprite_palette_memory_usage = 0;
+
+/*
+	 allocates gfx space and loads in tiles to gfx. for main or sub depending on isMain.
+	 sets gfx pointer.
+	 sets to NULL if cannot allocate.
+*/
 void allocate_sprite(u16 ** gfx, const unsigned int * tiles, unsigned int tilesLen, char isMain ) {
 
 	OamState * oam = &oamMain;
@@ -334,28 +354,20 @@ void allocate_sprite(u16 ** gfx, const unsigned int * tiles, unsigned int tilesL
 	if (!isMain)
 		oam = &oamSub;
 	
-		
-
 	*gfx = oamAllocateGfx(oam, SpriteSize_16x16, SpriteColorFormat_256Color);
 	printf("tile: %p\n",*gfx );
+	
 	if (*gfx == NULL) {
-	
 		return;
-	}
-	
-	//memory_usage += (SpriteSize_16x16 & 0xFFF) << 5;
-	//Copy data for the graphic (palette and bitmap)
-
-	
+	}	
 	dmaCopy(tiles, *gfx, tilesLen);
-
-	//sprite_palette_memory_usage += palLen;
-	
 }
 
-void update_ships() {
+/*
+	updates all ship sprites and target sprite.
+*/
+void update_sprites() {
 	int i,j;
-
 
 	//MAIN ENGINE: TARGET
 	oamSet(&oamMain, 
@@ -376,7 +388,6 @@ void update_ships() {
 	
 	int is_horizontal;
 	//SUB ENGINE: PLAYER SHIPS
-
 	for (i =0; i< NUM_SHIPS; i++) {
 		
 		ship *p_ship = player_ships + i;
@@ -405,22 +416,22 @@ void update_ships() {
 				false			// Mosaic
     		);
 			
-
-			
 		}
-
-
-		
 	}
-   	
 	
 }
 
+/*
+	hides all ship sprites.
+*/
 void hide_player_ships(){
 	int i;
 	for (i = 0; i<NUM_SHIPS; i++) player_ships[i].is_hidden = 1;
 }
 
+/*
+	reveals all ship sprites.
+*/
 void show_player_ships(){
 	int i;
 	for (i = 0; i<NUM_SHIPS; i++) player_ships[i].is_hidden = 0;

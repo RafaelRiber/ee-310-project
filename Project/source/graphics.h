@@ -15,7 +15,7 @@ extern u16* gfx;
 #define HOST_BUTTON_RIGHT 171
 
 void configure_graphics();
-void update_ships();
+void update_sprites();
 void allocate_sprite(u16 ** gfx, const unsigned int * tiles, unsigned int tilesLen, char isMain );
 void new_shot_sprite(int isHit, int x, int y, int is_main);
 void load_backgrounds(int screen);

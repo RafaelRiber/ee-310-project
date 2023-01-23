@@ -1,10 +1,9 @@
 #include "message_protocol.h"
 
- char send_buffer[MSG_SIZE];
- char recv_buffer[MSG_SIZE];
+char send_buffer[MSG_SIZE];
+char recv_buffer[MSG_SIZE];
 
 // Initializes wifi and opens socket for communication, with debug printing
-
 void wifi_test() {
 	//Initialize WiFi
 	if (initWiFi())
@@ -23,9 +22,10 @@ void wifi_test() {
 	}
 }
 
-// Initializes wifi and opens socket for communication
-// Access point SSID is defined in WIFI_Minilib.h
-
+/*
+	Initializes wifi and opens socket for communication
+	Access point SSID is defined in WIFI_Minilib.h
+*/
 void wifi_init() {
 	//Initialize WiFi
 	initWiFi();
@@ -82,6 +82,3 @@ int recvMessage(message_type type) {
     return 0;
 }
 
-void clearBuffer(char* buff){
-	memset(buff, 0, MSG_SIZE);
-}

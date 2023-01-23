@@ -1,9 +1,17 @@
+// battleships
+// A simple text api to be used with a libnds projec
+// requires a 32x32 tile mode background.
+// update 255th bg_palette for main and sub to change colour.
+// default colour white.
+// currently uses text tileset in text_and_shots.h 
+// in the future this tile set will be suppliable in init.
+// Tharen and Rafael
+
 #include "text.h"
 #include "text_and_shots.h"
 #include "stdio.h"
 #include "string.h"
 #include "ctype.h"
-
 
 
 typedef struct text_obj {
@@ -58,6 +66,9 @@ void insert_str(u16 * map, char * string, int len, int x, int y) {
 
 }
 
+/*
+    clears portion of text map, x and y are screen coordinates. 
+*/
 void clear_map_portion(u16* map, int x, int y, int len) {
     x/= 8;
     y/= 8;
@@ -67,6 +78,10 @@ void clear_map_portion(u16* map, int x, int y, int len) {
     }
 }
 
+/*
+    text api assumes 32x32 tiling for main and sub engines. 
+    has to receive pointers for both engines.
+*/
 int init_text_api(u16 * map_main, u8* tile_main, u16 *map_sub, u8* tile_sub) {
     if (map_main == NULL || tile_main == NULL || map_sub == NULL || tile_sub == NULL)
         return -1;
@@ -75,13 +90,6 @@ int init_text_api(u16 * map_main, u8* tile_main, u16 *map_sub, u8* tile_sub) {
     map_ptr_sub = map_sub;
     tile_ptr_sub = tile_sub;
     
-
-    // int pal_off = pal_off_main;
-    // if (pal_off_sub > pal_off)
-    //     pal_off = pal_off_sub;
-    // pal_main = BG_PALETTE + pal_off;
-    // pal_sub = BG_PALETTE_SUB + pal_off;
-
     BG_PALETTE[TEXT_PAL_IDX] = ARGB16(1, 31, 31, 31);
     BG_PALETTE_SUB[TEXT_PAL_IDX] = ARGB16(1, 31, 31, 31);
 
@@ -102,9 +110,9 @@ int init_text_api(u16 * map_main, u8* tile_main, u16 *map_sub, u8* tile_sub) {
 };
 /*
     adds new text obj to datastructure and returns its id.
-    returns -text_error if error.
+    returns -text_error if error. 
 
-    warning: can overide existing text. 
+    set text to "" if it needs to be hidden.
 */
 int new_text(char * string, int x, int y, int is_main) {
     text_count ++;
@@ -126,24 +134,19 @@ int new_text(char * string, int x, int y, int is_main) {
     if (!is_main) { 
         map = map_ptr_sub;
     }
-
     obj->x = x;
     obj->y = y;
     obj->is_main = is_main;
     obj->len = len;
 
-    
     insert_str(map, string, len, x, y);
     return text_count;
 }
 
 
+
 int update_text(int id, char * string, int x, int y) {
    
-    
-    //BG_PALETTE[4] = ;
-    
-    
     if (string == NULL)
         return -INVALID_PARAM;
     if (id < 0 || id > text_count)
@@ -155,7 +158,6 @@ int update_text(int id, char * string, int x, int y) {
         y = text_arr[id].y;
     }
         
-
     if (text_arr[id].x + (len*8) >= SCREEN_WIDTH || x < 0 || y < 0 || y >= SCREEN_HEIGHT)
     return -INVALID_PARAM;
 
