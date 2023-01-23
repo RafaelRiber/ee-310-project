@@ -8,7 +8,7 @@
 #include "battleship_title_sub.h"
 #include "hosting_waiting_sub.h"
 
-#include "shots.h"
+#include "text_and_shots.h"
 #include "spritemap.h"
 #include "battleships.h"
 #include "text.h"
@@ -21,8 +21,8 @@
 #define TEXT_MAP_BASE 1  // [2, 4)
 #define SHOT_MAP_BASE 2 // [6, 8)
 #define GB_BG_TILE_BASE 1 // [16, 32)
-#define TEXT_TILE_BASE 3 
-#define SHOT_TILE_BASE 5 
+#define TEXT_TILE_BASE 4 
+#define SHOT_TILE_BASE 7 
 
 #define GAMEBOARD_PRIORITY 2
 #define SPRITE_PRIORITY 1
@@ -30,7 +30,6 @@
 #define TEXT_PRIORITY 0
 
 
-#define SHOTS_TILES_SIZE ((64*4)*2)
 #define HIT_IDX 0 
 #define MISS_IDX 4
 #define BLANK_IDX 8
@@ -172,14 +171,6 @@ int get_pal_size(const unsigned short * pal, int max_size) {
 	return bytes;
 }
 
-void add_pal_offset_to_tile(u8* tiles, int num_tiles, int offset) {
-	int i;
-	for (i = 0; i < 64*num_tiles; i++) {
-		if (tiles[i] != 0)
-			tiles[i] +=offset;
-	}
-}
-
 
 void configure_graphics() {
     //MAIN engine
@@ -190,7 +181,7 @@ void configure_graphics() {
 	REG_DISPCNT_SUB = MODE_0_2D | DISPLAY_BG0_ACTIVE | DISPLAY_BG1_ACTIVE | DISPLAY_BG2_ACTIVE;
 	VRAM_C_CR = VRAM_ENABLE | VRAM_C_SUB_BG;
 
-	//BG0 (bitmaps) configuration
+	// //BG0 (bitmaps) configuration
 	BGCTRL_SUB[GB_BG] = BG_COLOR_256 | BG_MAP_BASE(GB_BG_MAP_BASE) | BG_TILE_BASE(GB_BG_TILE_BASE) | BG_32x32 | BG_PRIORITY(GAMEBOARD_PRIORITY);
 	BGCTRL[GB_BG] = BG_COLOR_256 | BG_MAP_BASE(GB_BG_MAP_BASE) | BG_TILE_BASE(GB_BG_TILE_BASE) | BG_32x32 | BG_PRIORITY(GAMEBOARD_PRIORITY);
 	
@@ -205,52 +196,31 @@ void configure_graphics() {
 	
 	// palette filling
 	int i;
-	int palette_usage_main = 0;
-	int palette_usage_sub = 0;
 	for (i = 0; i < NUM_SCREENS; i++) {
 		int bg_pal_main = get_pal_size(main_backgrounds[i].pal, main_backgrounds[i].palLen);
-		if (bg_pal_main > palette_usage_main)
-			palette_usage_main = bg_pal_main;
+		if (bg_pal_main > gameboard_pal_usage_main)
+			gameboard_pal_usage_main = bg_pal_main;
 
 		int bg_pal_sub = get_pal_size(sub_backgrounds[i].pal, sub_backgrounds[i].palLen);
-		if (bg_pal_sub > palette_usage_sub)
-			palette_usage_sub = bg_pal_sub;
+		if (bg_pal_sub > gameboard_pal_usage_sub)
+			gameboard_pal_usage_sub = bg_pal_sub;
 	}
 
-	gameboard_pal_usage_main = palette_usage_main;
-	gameboard_pal_usage_sub = palette_usage_sub;
-	int pal_off = (gameboard_pal_usage_main+1)/sizeof(u16); 
-	int pal_off_sub = (gameboard_pal_usage_sub+1)/sizeof(u16); 
-
-	int shots_pal_size = get_pal_size(shotsPal, shotsPalLen);
-	
-	
-	// shot tile filling
-	add_pal_offset_to_tile((u8*)shotsTiles, 8, pal_off);
-	dmaCopy(shotsTiles, ((u8*)BG_TILE_RAM(SHOT_TILE_BASE)), SHOTS_TILES_SIZE);
-	add_pal_offset_to_tile((u8*)shotsTiles, 8, -pal_off + pal_off_sub);
-	dmaCopy(shotsTiles, ((u8*)BG_TILE_RAM_SUB(SHOT_TILE_BASE)), SHOTS_TILES_SIZE);
+	dmaCopy(shotsTiles, BG_TILE_RAM(SHOT_TILE_BASE), SHOTS_LEN);
+	dmaCopy(shotsTiles, BG_TILE_RAM_SUB(SHOT_TILE_BASE), SHOTS_LEN);
 	
 
-
+	//fill main pal with shot pal	manually.
+	BG_PALETTE[HIT_PAL_IDX] = ARGB16(1,31, 0, 0);
+	BG_PALETTE[MISS_PAL_IDX] = ARGB16(1,0, 0, 31);
 	
-	//fill main pal with shot pal
-	
-	
-	add_pal_offset_to_tile(((u8*)BG_TILE_RAM_SUB(SHOT_TILE_BASE)), 8,pal_off_sub);
-	dmaCopy(shotsPal, BG_PALETTE + pal_off ,shots_pal_size);
-	dmaCopy(shotsPal, BG_PALETTE_SUB +pal_off_sub ,shots_pal_size);
+	BG_PALETTE_SUB[HIT_PAL_IDX] = ARGB16(1,31, 0, 0);
+	BG_PALETTE_SUB[MISS_PAL_IDX] = ARGB16(1,0, 0, 31);
 
-	palette_usage_main += shots_pal_size;
-	palette_usage_sub += shots_pal_size;
-
-
-
-	
 	clear_shots();
 	
-	init_text_api(BG_MAP_RAM(TEXT_MAP_BASE), BG_TILE_RAM(TEXT_TILE_BASE), BG_MAP_RAM_SUB(TEXT_MAP_BASE), BG_TILE_RAM_SUB(TEXT_TILE_BASE), palette_usage_main/sizeof(u16), palette_usage_sub/sizeof(u16));
-	
+	init_text_api(BG_MAP_RAM(TEXT_MAP_BASE), (u8*)BG_TILE_RAM(TEXT_TILE_BASE), BG_MAP_RAM_SUB(TEXT_MAP_BASE), (u8*)BG_TILE_RAM_SUB(TEXT_TILE_BASE));
+
 	// ###############################################################################################################################
 
 
@@ -312,9 +282,9 @@ void load_backgrounds(int screen) {
 
 	//main
 	if ( screen != WAIT) {
-		swiCopy(main_backgrounds[screen].tiles, BG_TILE_RAM(GB_BG_TILE_BASE), main_backgrounds[screen].tilesLen/2);
-		swiCopy(main_backgrounds[screen].pal, BG_PALETTE, gameboard_pal_usage_main/sizeof(u16));
-		swiCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MAP_BASE), main_backgrounds[screen].mapLen/2);
+		dmaCopy(main_backgrounds[screen].tiles, BG_TILE_RAM(GB_BG_TILE_BASE), main_backgrounds[screen].tilesLen);
+		dmaCopy(main_backgrounds[screen].pal, BG_PALETTE, gameboard_pal_usage_main);
+		dmaCopy(main_backgrounds[screen].map, BG_MAP_RAM(GB_BG_MAP_BASE), main_backgrounds[screen].mapLen);
 	}
 
 	//sub
@@ -336,11 +306,10 @@ void new_shot_sprite(int isHit, int x, int y, int is_main){
 	u16 idx = HIT_IDX;
 	if (!isHit)
 		idx = MISS_IDX;
-
 	
 	// translate x and y into screen space tile coordinates.
 	x = 6+ (x*2);
-	y = 4+ (y*2); 
+	y = 2+ (y*2); 
 	
 
 	map[MAP_IDX(y, x)] = idx;

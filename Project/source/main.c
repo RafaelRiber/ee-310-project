@@ -13,10 +13,6 @@ int main(void) {
 	play_music();
     configure_graphics();
     load_backgrounds(MAIN_MENU);
-	new_shot_sprite(1, 4,4, 1);
-	new_shot_sprite(1, 5,5, 0);
-	new_shot_sprite(0, 4,4, 0);
-	new_shot_sprite(0, 5,5, 1);
 	int wifi_text = new_text("loading wifi", 150, 180,1);
     wifi_init();
     initScores();
