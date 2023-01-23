@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <stdio.h>
 
-#define SSID "Pixel_1221"
+#define SSID "MES-NDS"
 
 
 //WiFi initialization
