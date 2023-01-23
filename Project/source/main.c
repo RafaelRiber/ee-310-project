@@ -26,7 +26,7 @@ int main(void) {
 
     while(1){
     	update_state(&state);
-        update_ships();
+        update_sprites();
         swiWaitForVBlank();
         oamUpdate(&oamMain);
         oamUpdate(&oamSub);

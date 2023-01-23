@@ -1,3 +1,12 @@
+// battleships
+// A simple text api to be used with a libnds projec
+// requires a 32x32 tile mode background.
+// update 255th bg_palette for main and sub to change colour.
+// default colour white.
+// currently uses text tileset in text_and_shots.h 
+// in the future this tile set will be suppliable in init.
+// Tharen and Rafael
+
 #ifndef TEXT_H
 #define TEXT_H
 
