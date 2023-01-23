@@ -4,6 +4,17 @@
 #include "battleships.h"
 #include "text.h"
 
+
+/*
+ * BATTLESHIPS MULTIPLAYER
+ * A GAME BY THAREN CANDI AND RAFAEL RIBER
+ * EE-310 - WINTER SEMESTER 2022-2023
+ *
+ * Tested with latest libnds version as of December 2022,
+ * installed with devkitPro pacman 1.0.2
+ *
+ */
+
 int main(void) {
 
     

@@ -473,6 +473,7 @@ void wait_placement_transition(GameState *state) {
 void wait_turn_transition(GameState *state) {
 	load_backgrounds(GAME);
 	show_player_ships();
+	update_text(status_txt_id, "YOUR TURN", -1, -1);
 	check_win_transition(state, STATE_TAKING_TURN);
 }
 
@@ -507,7 +508,26 @@ void check_win_transition(GameState *state, GameState stateIfNotOver) {
  * Ships are sent to other player and then all game logic is done locally.
  * Shots are sent upon placement. In case of packet drop, the START key interrupt resends the shot message to other player.
  * A check is made every time a turn takes place to check for game over.
+ * Roughly:
  *
+ *						  STATE_HOME
+                        /           \
+                    STATE_HOST      STATE_JOIN
+                            \       /
+                        STATE_PLACE_SHIPS
+                                |
+                        (if ships recv)
+                        Y/             \N
+                         \              STATE_WAIT_FOR_ENEMY_PLACEMENT
+                          \             /
+                           \           /
+                            (if Host)
+                            Y/       \N
+                STATE_TAKING_TURN     STATE_WAITING_FOR_TURN
+                                 ...
+                                 ...
+                                 ...
+                            STATE_GAMEOVER
  */
 
 void update_state(GameState* state) {
