@@ -13,4 +13,4 @@ On very rare occasions there may be too much packet loss and the game must be re
 
 On game over, a text indicates if you have won or lost and the game statistics are updated. After a brief moment, you automatically return to the homescreen, ready to start a new game whenever you like !
 
-#### Note: Tested on the latest version of libnds
+#### Note: Tested on the latest version of libnds as of Dec. 2022
